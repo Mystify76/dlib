@@ -1,6 +1,6 @@
 {
-  "name": "dlib",
-  "version": "0.0.2",
+  "name": "@mystify/dlib",
+  "version": "0.0.4",
   "description": "A collection of simple shortcut functions I use across various projects. Mainly for ES6, React, and NodeJS",
   "main": "index.js",
   "scripts": {
@@ -19,6 +19,7 @@
     "@babel/plugin-transform-runtime": "^7.6.0",
     "@babel/preset-env": "^7.6.0",
     "babel-loader": "^8.0.6",
+    "babel-plugin-add-module-exports": "^1.0.2",
     "babel-plugin-lodash": "^3.3.4",
     "clean-webpack-plugin": "^3.0.0",
     "cross-env": "^5.2.1",
