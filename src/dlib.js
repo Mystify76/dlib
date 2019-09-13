@@ -439,12 +439,13 @@ const setDocumentValue  = function (object, path, value) {
  * Generate a random password
  * @returns string
  */
-const generatePassword = function (lowerCase = false, upperCase = true, numbers = true, symbols = false, minLength = 8, maxLength = 8, allowDuplicates = true, preventRepeatingCharacters = true) {
+const generatePassword = function (lowerCase = false, upperCase = true, numbers = true, symbols = false, minLength = 8, maxLength = 8, allowDuplicates = true, preventRepeatingCharacters = true, excludeConfusing = true) {
   let availableCharacters = "";
   if (lowerCase) availableCharacters += "abcdefghijklmnopqrstuvwxyz";
   if (upperCase) availableCharacters += "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   if (numbers) availableCharacters += "012345789";
   if (symbols) availableCharacters += "!@#$%&*";
+  if (excludeConfusing) availableCharacters = availableCharacters.replace(/[0OoiIlL1]/g, "");
   availableCharacters = availableCharacters.split(""); // just makes processing easier.
 
   let length       = minLength === maxLength ? maxLength : random(minLength, maxLength);
@@ -452,18 +453,19 @@ const generatePassword = function (lowerCase = false, upperCase = true, numbers 
   let addAfterPick = undefined;
   let password     = "";
 
-  for (let i = 0; i < length; i++) {
-    if (availableCharacters.length < 1) break; // if no more letters to pick, stop.
-    let index = random(0, availableCharacters.length - 1); // get a random letter index;
-    char = availableCharacters.splice(index, 1, "")[0]; // get that letter and remove it from the array.
-    if (!_.isNil(addAfterPick)) { // if we are to put the letter back in the array after picking one to prevent repeats, do it now
-      availableCharacters.push(addAfterPick);
-      addAfterPick = undefined;
-    }
-    password += char; // add the letter to our password
-    if (allowDuplicates) {
-      if (preventRepeatingCharacters) addAfterPick = char; // if we are preventing repeating characters, remember it for the next loop and do not re-add it.
-      else availableCharacters.push(char); // if we are allow duplicates, just throw it back into the array.
+  while (password.length < length || availableCharacters.length < 1) {
+    if (availableCharacters.length > 0) {
+      let index = random(0, availableCharacters.length - 1); // get a random letter index;
+      char      = availableCharacters.splice(index, 1, "")[0]; // get that letter and remove it from the array.
+      if (!_.isNil(addAfterPick)) { // if we are to put the letter back in the array after picking one to prevent repeats, do it now
+        availableCharacters.push(addAfterPick);
+        addAfterPick = undefined;
+      }
+      password += char; // add the letter to our password
+      if (allowDuplicates) {
+        if (preventRepeatingCharacters) addAfterPick = char; // if we are preventing repeating characters, remember it for the next loop and do not re-add it.
+        else availableCharacters.push(char); // if we are allow duplicates, just throw it back into the array.
+      }
     }
   }
   return password;
