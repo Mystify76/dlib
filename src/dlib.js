@@ -233,41 +233,27 @@ const normalize = function (str, removeSpaces = false) {
  * Get the browser user agent information
  * @returns {object}
  */
-const userAgent = function () {
-  this.os         = typeof navigator === "object" ? (navigator.platform.match(/mac|win|linux/i) || ["other"])[0].toLowerCase() : "";
-  this.ua         = typeof navigator === "object" ? navigator.userAgent : "";
-  this.OS         = {
-    LINUX  : "LINUX",
-    MAC    : "MAC",
-    WINDOWS: "WINDOWS"
-  };
-  this.getOS      = () => {
-    if (this.isMac) {
-      return this.OS.MAC;
-    }
-    else if (this.isLinux) {
-      return this.OS.LINUX;
-    }
-    else {
-      return this.OS.WINDOWS;
-    }
-  };
-  this.isIOS      = /iPad|iPhone|iPod/.test(this.ua) && !window.MSStream;
-  this.isWin      = (this.os === "win");
-  this.isMac      = (this.os === "mac") || this.isIOS;
-  this.isLinux    = (this.os === "linux");
-  this.isIE       = typeof navigator === "object" ? ((navigator.appName === "Microsoft Internet Explorer" || navigator.appName.indexOf("MSAppHost") >= 0) ? parseFloat((this.ua.match(/(?:MSIE |Trident\/[0-9]+[.0-9]+;.*rv:)([0-9]+[.0-9]+)/) || [])[1]) : parseFloat((this.ua.match(/(?:Trident\/[0-9]+[.0-9]+;.*rv:)([0-9]+[.0-9]+)/) || [])[1])) : false;
-  this.isOldIE    = this.isIE && this.isIE < 9;
-  this.isGecko    = this.isMozilla = this.ua.match(/ Gecko\/\d+/);
-  this.isOpera    = window.opera && Object.prototype.toString.call(window.opera) === "[object Opera]";
-  this.isWebKit   = parseFloat(this.ua.split("WebKit/")[1]) || undefined;
-  this.isChrome   = parseFloat(this.ua.split(" Chrome/")[1]) || undefined;
-  this.isEdge     = parseFloat(this.ua.split(" Edge/")[1]) || undefined;
-  this.isAIR      = this.ua.indexOf("AdobeAIR") >= 0;
-  this.isIPad     = this.ua.indexOf("iPad") >= 0;
-  this.isAndroid  = this.ua.indexOf("Android") >= 0;
-  this.isChromeOS = this.ua.indexOf(" CrOS ") >= 0;
-  this.isMobile   = this.isIPad || this.isAndroid;
+const userAgent = function (navigator) {
+  let agent = {};
+  agent.os         = typeof navigator === "object" ? (navigator.platform.match(/mac|win|linux/i) || ["other"])[0].toLowerCase() : "";
+  agent.ua         = typeof navigator === "object" ? navigator.userAgent : "";
+  agent.isIOS      = /iPad|iPhone|iPod/.test(agent.ua) && !window.MSStream;
+  agent.isWin      = (agent.os === "win");
+  agent.isMac      = (agent.os === "mac") || agent.isIOS;
+  agent.isLinux    = (agent.os === "linux");
+  agent.isIE       = typeof navigator === "object" ? ((navigator.appName === "Microsoft Internet Explorer" || navigator.appName.indexOf("MSAppHost") >= 0) ? parseFloat((agent.ua.match(/(?:MSIE |Trident\/[0-9]+[.0-9]+;.*rv:)([0-9]+[.0-9]+)/) || [])[1]) : parseFloat((agent.ua.match(/(?:Trident\/[0-9]+[.0-9]+;.*rv:)([0-9]+[.0-9]+)/) || [])[1])) : false;
+  agent.isOldIE    = agent.isIE && agent.isIE < 9;
+  agent.isGecko    = agent.isMozilla = agent.ua.match(/ Gecko\/\d+/);
+  agent.isOpera    = window.opera && Object.prototype.toString.call(window.opera) === "[object Opera]";
+  agent.isWebKit   = parseFloat(agent.ua.split("WebKit/")[1]) || undefined;
+  agent.isChrome   = parseFloat(agent.ua.split(" Chrome/")[1]) || undefined;
+  agent.isEdge     = parseFloat(agent.ua.split(" Edge/")[1]) || undefined;
+  agent.isAIR      = agent.ua.indexOf("AdobeAIR") >= 0;
+  agent.isIPad     = agent.ua.indexOf("iPad") >= 0;
+  agent.isAndroid  = agent.ua.indexOf("Android") >= 0;
+  agent.isChromeOS = agent.ua.indexOf(" CrOS ") >= 0;
+  agent.isMobile   = agent.isIPad || agent.isAndroid;
+  return agent;
 };
 
 /**
