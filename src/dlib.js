@@ -2,7 +2,7 @@ const _       = require("lodash");
 const Promise = require("bluebird");
 Promise.config({warnings: {wForgottenReturn: false}, cancellation: true});
 
-let lut    = [];
+let lut = [];
 for (let i = 0; i < 256; i++) { lut[i] = (i < 16 ? '0' : '') + (i).toString(16); }
 
 /**
@@ -11,7 +11,7 @@ for (let i = 0; i < 256; i++) { lut[i] = (i < 16 ? '0' : '') + (i).toString(16);
  * Shamelessly stolen from someone else, but I don't remember who as it was a long time ago.
  * @returns {string}
  */
-const UUID = function(noDash = false) {
+const UUID = function (noDash = false) {
   let d0 = Math.random() * 0xffffffff | 0;
   let d1 = Math.random() * 0xffffffff | 0;
   let d2 = Math.random() * 0xffffffff | 0;
@@ -31,8 +31,7 @@ const UUID = function(noDash = false) {
 const toNumber = function (number, int = false) {
   if (int) {
     return !isNaN(number) && !isNaN(parseInt(number)) ? parseInt(number) : undefined;
-  }
-  else {
+  } else {
     return !isNaN(number) && !isNaN(parseFloat(number)) ? parseFloat(number) : undefined;
   }
 };
@@ -134,8 +133,7 @@ const objectToDotPaths = function (source, circularReferences = []) {
     if (_.isObjectLike(source[key]) && !_.isDate(source[key])) {
       let subKeys = objectToDotPaths(source[key], circularReferences);
       keys        = keys.concat(subKeys.map(subKey => key + "." + subKey));
-    }
-    else {
+    } else {
       keys.push(key);
     }
   });
@@ -158,8 +156,7 @@ const objectToDotPathsAsync = function (source, circularReferences = []) {
     _.keys(source).forEach((key, index, arr) => {
       if (_.isObjectLike(source[key]) && !_.isDate(source[key])) {
         promises.push(objectToDotPaths(source[key], circularReferences));
-      }
-      else {
+      } else {
         keys.push(key);
       }
     });
@@ -170,8 +167,7 @@ const objectToDotPathsAsync = function (source, circularReferences = []) {
       promises.forEach(subKeys => {
         if (_.keys(source[key]).length === _.keys(subKeys).length) {
           keys.push(key);
-        }
-        else {
+        } else {
           keys = keys.concat(subKeys.map(subKey => key + "." + subKey));
         }
       });
@@ -311,9 +307,9 @@ const removeEmptyProperties = function (object) {
  * @return component
  */
 const addKeys = function (react, component) {
-  if(!react || !component) return component;
+  if (!react || !component) return component;
   const isValidElement = react.isValidElement;
-  const cloneElement = react.cloneElement;
+  const cloneElement   = react.cloneElement;
   if (!isValidElement(component)) return component;
   if (!_.has(component, ["props", "children"])) return component;
 
@@ -409,26 +405,25 @@ const isEmailValid = function (email, emptyIsValid = false) {
 
 };
 
-
 /**
  * Set's a value into a nested document field. This is because according to the mongoose docs it's not recommend to use
  * lodash set or other library. Don't know why. Just have to do it the hard way.
  * This function will mutate the object.
  * @returns {object}
  */
-const setDocumentValue  = function (object, path, value) {
-  if(!object || !path) return object;
-  if(!_.isArray(path)) path = _.split(path, ".");
+const setDocumentValue = function (object, path, value) {
+  if (!object || !path) return object;
+  if (!_.isArray(path)) path = _.split(path, ".");
 
   let currentObject = object;
-  for(let index = 0; index < path.length; index++) {
+  for (let index = 0; index < path.length; index++) {
     if (index === path.length - 1) {
       currentObject[path[index]] = value;
     } else if (_.has(currentObject, path[index])) {
       currentObject = currentObject[path[index]];
-    } else if(index < path.length - 1) {
+    } else if (index < path.length - 1) {
       currentObject[path[index]] = {};
-      currentObject = currentObject[path[index]];
+      currentObject              = currentObject[path[index]];
     }
   }
 
@@ -478,18 +473,18 @@ const generatePassword = function (lowerCase = false, upperCase = true, numbers 
  * @returns the value of the property
  */
 const getReqProp = function (req, prop = undefined) {
-  if(!req) return undefined;
+  if (!req) return undefined;
 
   let values = undefined;
 
-  if((req.method === "POST" || req.method === "PUT" && req.body)) values = req.body;
-  else if(req.method === "GET" && req.query) values = req.query;
-  else if(req.body && !req.query) values = req.body;
-  else if(req.query && !req.body) values = req.query;
-  else if(req.body && !_.isEmpty(req.body)) values = req.body;
-  else if(req.query && !_.isEmpty(req.query)) values = req.body;
+  if ((req.method === "POST" || req.method === "PUT" && req.body)) values = req.body;
+  else if (req.method === "GET" && req.query) values = req.query;
+  else if (req.body && !req.query) values = req.body;
+  else if (req.query && !req.body) values = req.query;
+  else if (req.body && !_.isEmpty(req.body)) values = req.body;
+  else if (req.query && !_.isEmpty(req.query)) values = req.body;
 
-  if(!values || !prop) return values;
+  if (!values || !prop) return values;
   return values[prop];
 };
 
@@ -688,8 +683,7 @@ const dateFormatToArray = function (format) {
       if (!tokenFound) {
         if (formatArray.length && _.last(formatArray).separator) {
           formatArray[formatArray.length - 1].separator += format.substr(0, 1);
-        }
-        else {
+        } else {
           formatArray.push({separator: format.substr(0, 1)});
         }
         format = format.slice(1);
@@ -777,11 +771,9 @@ const dateFormatToMask = function (format) {
         default:
           return _.toString(token);
       }
-    }
-    else if (_.has(element, "separator")) {
+    } else if (_.has(element, "separator")) {
       return _.toString(element.separator);
-    }
-    else {
+    } else {
       return _.toString(element);
     }
   });
@@ -790,12 +782,12 @@ const dateFormatToMask = function (format) {
   return mask;
 };
 
-const showTimeUnit = {
+const showTimeUnit         = {
   always : "always",
   nonZero: "nonZero",
   never  : "never"
 };
-const toTimeStringDefaults  = {showDays: "nonZero", showHours: "nonZero", showMinutes: "nonZero", showSeconds: "nonZero", showMilliseconds: "never", padDays: false, padHours: false, padMinutes: false, padSeconds: false, formatNumber: true};
+const toTimeStringDefaults = {showDays: "nonZero", showHours: "nonZero", showMinutes: "nonZero", showSeconds: "nonZero", showMilliseconds: "never", padDays: false, padHours: false, padMinutes: false, padSeconds: false, formatNumber: true};
 
 /**
  * Convert a number in milliseconds to a time formatted string in dd:hh:m:ss.ms
@@ -832,8 +824,7 @@ const toTimeString = function (number, options = toTimeStringDefaults) {
         }
       }
     }
-  }
-  else {
+  } else {
     h = Math.floor(number / (1000 * 60 * 60));
     if (options.showHours === showTimeUnit.always || (options.showHours === showTimeUnit.nonZero && h > 0)) {
       h      = options.formatNumber ? h.toLocaleString() : _.toString(h);
@@ -851,8 +842,7 @@ const toTimeString = function (number, options = toTimeStringDefaults) {
 
         }
       }
-    }
-    else {
+    } else {
       m = Math.floor(number / (1000 * 60));
       if (options.showMinutes === showTimeUnit.always || (options.showMinutes === showTimeUnit.nonZero && m > 0)) {
         m      = options.formatNumber ? m.toLocaleString() : _.toString(m);
@@ -865,8 +855,7 @@ const toTimeString = function (number, options = toTimeStringDefaults) {
             result += "." + _.padStart(x, 3, "0");
           }
         }
-      }
-      else {
+      } else {
         s = Math.floor(number / 1000);
         if (options.showSeconds === showTimeUnit.always || (options.showSeconds === showTimeUnit.nonZero && s > 0)) {
           s      = options.formatNumber ? s.toLocaleString() : _.toString(s);
@@ -875,13 +864,11 @@ const toTimeString = function (number, options = toTimeStringDefaults) {
           if (options.showMilliseconds !== showTimeUnit.never) {
             result += "." + _.padStart(x, 3, "0");
           }
-        }
-        else {
+        } else {
           x = number;
           if (options.showMilliseconds === showTimeUnit.always || (options.showMilliseconds === showTimeUnit.nonZero && x > 0)) {
             result = "0." + _.padStart(x, 3, "0");
-          }
-          else {
+          } else {
             result = "0";
           }
         }
@@ -1176,43 +1163,46 @@ const getBezier2DPercentage = function (p1, p2, cp1, cp2, percentage) {
  */
 const colorToRGBA = function (color) {
   let newColor = {r: 0, g: 0, b: 0, a: 1};
-  if (color === "transparent") return {r: 0, g: 0, b: 0, a: 0};
 
-  let alpha = null;
-  if (color.startsWith("rgb")) {
-    color = color.replace(/(rgb\()|(rgba\()|\)/g, "").split(",");
-    if (color.length < 3 || color.length > 4) return undefined;
-    newColor.r = parseInt(color[0]);
-    newColor.g = parseInt(color[1]);
-    newColor.b = parseInt(color[2]);
-    if (color[3]) newColor.a = color[3] ? parseFloat(color[3]) : 1;
+  try {
+    let alpha = null;
+    if (color.startsWith("rgb")) {
+      color = color.replace(/(rgb\()|(rgba\()|\)/g, "").split(",");
+      if (color.length < 3 || color.length > 4) return undefined;
+      newColor.r = parseInt(color[0]);
+      newColor.g = parseInt(color[1]);
+      newColor.b = parseInt(color[2]);
+      if (color[3]) newColor.a = color[3] ? parseFloat(color[3]) : 1;
 
-  } else {
-    if (color.startsWith("#")) color = color.substr(1, color.length);
-    if (color.startsWith("0x")) color = color.substr(2, color.length);
-    switch (color.length) {
-      case 8:
-        alpha = parseInt(color.substr(-2, 2), 16);
-        color = parseInt(color.substr(0, 6), 16);
-        break;
-      case 6:
-        color = parseInt(color, 16);
-        break;
-      case 4:
-        alpha = parseInt(color.substr(-1, 1) + color.substr(-1, 1), 16);
-        color = parseInt(color[0] + color[0] + color[1] + color[1] + color[2] + color[2], 16); // 1 digit with alpha
-        break;
-      case 3:
-        color = parseInt(color[0] + color[0] + color[1] + color[1] + color[2] + color[2], 16); // 1 digit outout alpha
-        break;
-      default:
-        return undefined;
+    } else {
+      if (color.startsWith("#")) color = color.substr(1, color.length);
+      if (color.startsWith("0x")) color = color.substr(2, color.length);
+      switch (color.length) {
+        case 8:
+          alpha = parseInt(color.substr(-2, 2), 16);
+          color = parseInt(color.substr(0, 6), 16);
+          break;
+        case 6:
+          color = parseInt(color, 16);
+          break;
+        case 4:
+          alpha = parseInt(color.substr(-1, 1) + color.substr(-1, 1), 16);
+          color = parseInt(color[0] + color[0] + color[1] + color[1] + color[2] + color[2], 16); // 1 digit with alpha
+          break;
+        case 3:
+          color = parseInt(color[0] + color[0] + color[1] + color[1] + color[2] + color[2], 16); // 1 digit outout alpha
+          break;
+        default:
+          return undefined;
+      }
+
+      newColor.r = color >> 16 & 255;
+      newColor.g = color >> 8 & 255;
+      newColor.b = color & 255;
+      if (alpha !== null) newColor.a = alpha;
     }
-
-    newColor.r = color >> 16 & 255;
-    newColor.g = color >> 8 & 255;
-    newColor.b = color & 255;
-    if (alpha !== null) newColor.a = alpha;
+  } catch (err) {
+    // color was missing or a literal string.
   }
   return newColor;
 };
@@ -1258,11 +1248,11 @@ const rgbaToString = function (color) {
  */
 const hexToRGBA = function (hexColor, a) {
   if (!hexColor) return undefined;
+  if (hexColor === "transparent") return 0;
   let color = colorToRGBA(hexColor);
   if (!_.isNil(a)) {
     return `rgba(${color.r}, ${color.g}, ${color.b}, ${a})`;
-  }
-  else {
+  } else {
     return `rgb(${color.r}, ${color.g}, ${color.b})`;
   }
 };
@@ -1279,21 +1269,24 @@ const colorBlend = function (percentage, from, to) {
   if (typeof (percentage) !== "number") return undefined;
   if (percentage === 0) return from;
 
-  let fromColor = _.isObjectLike(from) && _.has(from, ["r"]) && _.has(from, ["g"]) && _.has(from, ["b"]) ? from : colorToRGBA(from);
-  let toColor   = _.isObjectLike(to) && _.has(to, ["r"]) && _.has(to, ["g"]) && _.has(to, ["b"]) ? color : colorToRGBA(to);
-  percentage    = Math.max(0, Math.min(1, percentage));
+  try {
+    let fromColor = _.isObjectLike(from) && _.has(from, ["r"]) && _.has(from, ["g"]) && _.has(from, ["b"]) ? from : colorToRGBA(from);
+    let toColor   = _.isObjectLike(to) && _.has(to, ["r"]) && _.has(to, ["g"]) && _.has(to, ["b"]) ? color : colorToRGBA(to);
+    percentage    = Math.max(0, Math.min(1, percentage));
 
-  let newColor = {r: 0, g: 0, b: 0, a: 1};
-  newColor.r   = Math.round(percent(percentage, fromColor.r, toColor.r));
-  newColor.g   = Math.round(percent(percentage, fromColor.g, toColor.g));
-  newColor.b   = Math.round(percent(percentage, fromColor.b, toColor.b));
-  newColor.a   = Math.round(percent(percentage, fromColor.a, toColor.a));
+    let newColor = {r: 0, g: 0, b: 0, a: 1};
+    newColor.r   = Math.round(percent(percentage, fromColor.r, toColor.r));
+    newColor.g   = Math.round(percent(percentage, fromColor.g, toColor.g));
+    newColor.b   = Math.round(percent(percentage, fromColor.b, toColor.b));
+    newColor.a   = Math.round(percent(percentage, fromColor.a, toColor.a));
 
-  if (_.isObjectLike(from)) return newColor;
-  if (from.startsWith("rgba")) return "rgba(" + newColor.r + "," + newColor.g + "," + newColor.b + "," + newColor.a + ")";
-  if (from.startsWith("rgb")) return "rgb(" + newColor.r + "," + newColor.g + "," + newColor.b + ")";
-  if (from.startsWith("#")) return rgbaToHex(newColor.r, newColor.g, newColor.b, from.length === 5 || from.length === 9 ? newColor.a : undefined);
-
+    if (_.isObjectLike(from)) return newColor;
+    if (from.startsWith("rgba")) return "rgba(" + newColor.r + "," + newColor.g + "," + newColor.b + "," + newColor.a + ")";
+    if (from.startsWith("rgb")) return "rgb(" + newColor.r + "," + newColor.g + "," + newColor.b + ")";
+    if (from.startsWith("#")) return rgbaToHex(newColor.r, newColor.g, newColor.b, from.length === 5 || from.length === 9 ? newColor.a : undefined);
+  } catch (err) {
+    // color may have just been a litteral string... or something else. doesn't matter.
+  }
   return undefined;
 };
 
@@ -1304,11 +1297,14 @@ const colorBlend = function (percentage, from, to) {
  */
 const getBrightness = function (color) {
   if (_.isNil(color)) return undefined;
+  try {
+    let {r, g, b} = _.isObjectLike(color) && _.has(color, ["r"]) && _.has(color, ["g"]) && _.has(color, ["b"]) ? color : colorToRGBA(color);
+    if (_.isNil(r) && _.isNil(g) && _.isNil(b)) return undefined;
 
-  let {r, g, b} = _.isObjectLike(color) && _.has(color, ["r"]) && _.has(color, ["g"]) && _.has(color, ["b"]) ? color : colorToRGBA(color);
-  if (_.isNil(r) && _.isNil(g) && _.isNil(b)) return undefined;
-
-  return (r * 299 + g * 587 + b * 114) / 1000;
+    return (r * 299 + g * 587 + b * 114) / 1000;
+  } catch (err) {
+    return undefined;
+  }
 };
 
 /**
@@ -1336,7 +1332,7 @@ const resizeImage = function (document, imgSource, targetWidth, targetHeight, ke
   return new Promise((resolve, reject, onCancel) => {
     let cancelled = false;
     onCancel && onCancel(() => cancelled = true);
-    if(!document) return reject("document not defined");
+    if (!document) return reject("document not defined");
     let image     = new Image();
     image.onerror = () => reject();
     image.onload  = (e) => {
@@ -1350,8 +1346,7 @@ const resizeImage = function (document, imgSource, targetWidth, targetHeight, ke
         if (width > height) {
           newHeight = height * (targetWidth / width);
           newWidth  = targetWidth;
-        }
-        else {
+        } else {
           newWidth  = width * (targetHeight / height);
           newHeight = targetHeight;
         }
@@ -1374,16 +1369,14 @@ const resizeImage = function (document, imgSource, targetWidth, targetHeight, ke
         if (image.width > newWidth) {
           width = width * 0.6;
           if (width < newWidth) lastStep = true;
-        }
-        else {
+        } else {
           width = width * 2.2;
           if (width > newWidth) lastStep = true;
         }
         if (image.height > newHeight) {
           height = height * 0.6;
           if (height < newHeight) lastStep = true;
-        }
-        else {
+        } else {
           height = height * 2.2;
           if (height > newHeight) lastStep = true;
         }
@@ -1655,8 +1648,7 @@ const loadFileAsync = function (path) {
       if (xhr.readyState === XMLHttpRequest.DONE) {
         if (xhr.status === 200) {
           resolve(xhr.responseText);
-        }
-        else {
+        } else {
           reject(xhr);
         }
       }
@@ -1696,8 +1688,8 @@ const copyToClipboard = function (document, str) {
   document.body.removeChild(el);
 };
 
-
-module.exports = {UUID, toNumber, isSafe, combinePropsToString, stripTags, rectToObject, removeFunctions,
+module.exports = {
+  UUID, toNumber, isSafe, combinePropsToString, stripTags, rectToObject, removeFunctions,
   findLast, findLastIndex, objectToDotPaths, objectToDotPathsAsync, getArgWithProp, splitEvent, normalize,
   userAgent, concatSm, truncate, removeEmptyProperties, addKeys, randomizeArray, formatCurrency, escapeRegEx,
   unformatCurrency, isEmailValid, getDateFormatTokenType, getDateFormatTokenUnit, dateFormatToArray, dateFormatToMask,
@@ -1706,6 +1698,6 @@ module.exports = {UUID, toNumber, isSafe, combinePropsToString, stripTags, rectT
   getPointOnLine2D, getPointOnLine2DPercentage, getBezierPoint, getBezierPointPercentage, getBezier2D, getBezier2DPercentage,
   colorToRGBA, rgbaToHex, rgbaToString, hexToRGBA, colorBlend, getBrightness, isDark, resizeImage, getBoundingClientRect, rect,
   getViewport, focusNextElement, getFileSizeBaseUnit, getFileSizeString, pathSorter, sort, loadFileAsync, importFiles,
-  copyToClipboard, setDocumentValue,generatePassword,getReqProp
+  copyToClipboard, setDocumentValue, generatePassword, getReqProp
 };
 
