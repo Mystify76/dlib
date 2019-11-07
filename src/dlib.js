@@ -489,24 +489,20 @@ const getReqProp = function (req, prop = undefined) {
 };
 
 /**
- * takes 2 objects and loops over the property merging each property from each class together
- * @param classesA - the first object
- * @param classesB - the second object
+ * takes 2 or more objects with string properties and merges all the properties into single strings.
+ * @param classes - one or more objects
  * @returns object - a new object of all the properties of each object merged together.
  * **/
-export const mergeClasses = function(classesA, classesB) {
-  if(!classesA && !classesB) return {};
-  if(!_.isObjectLike(classesA) || !_.isObjectLike(classesB)) throw new Error("Classes passed into mergeClasses must be objects");
-  if(!classesA) return classesB;
-  if(!classesB) return classesA;
-  let keysA = _.keys(classesA);
-  let keysB = _.keys(classesB);
-  let keys = _.union(keysA, keysB);
-  let classes = {};
+export const mergeClasses = function(...classes) {
+  classes = _.compact(classes);
+  classes = classes.filter(cls => _.isObjectLike(cls));
+  if(classes.length === 0) return {};
+  let keys =  _.union(_.flatten(classes.map(cls => _.keys(cls))));
+  let mergedClasses = {};
   for(let key of keys) {
-    classes[key] = cx(classesA[key], classesB[key]);
+    mergedClasses[key] = cx(classes.map(cls => cls[key]));
   }
-  return classes;
+  return mergedClasses;
 };
 
 
