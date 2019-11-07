@@ -488,6 +488,28 @@ const getReqProp = function (req, prop = undefined) {
   return values[prop];
 };
 
+/**
+ * takes 2 objects and loops over the property merging each property from each class together
+ * @param classesA - the first object
+ * @param classesB - the second object
+ * @returns object - a new object of all the properties of each object merged together.
+ * **/
+export const mergeClasses = function(classesA, classesB) {
+  if(!classesA && !classesB) return {};
+  if(!_.isObjectLike(classesA) || !_.isObjectLike(classesB)) throw new Error("Classes passed into mergeClasses must be objects");
+  if(!classesA) return classesB;
+  if(!classesB) return classesA;
+  let keysA = _.keys(classesA);
+  let keysB = _.keys(classesB);
+  let keys = _.union(keysA, keysB);
+  let classes = {};
+  for(let key of keys) {
+    classes[key] = cx(classesA[key], classesB[key]);
+  }
+  return classes;
+};
+
+
 // --------- Date and Time Functions ------------------------------------------------------------------------
 
 /**

@@ -1,6 +1,6 @@
 {
   "name": "@mystify/dlib",
-  "version": "0.9.4",
+  "version": "0.9.5",
   "description": "A collection of simple shortcut functions I use across various projects. Mainly for ES6, React, and NodeJS",
   "main": "index.js",
   "scripts": {},
