@@ -1679,7 +1679,7 @@ export const loadFileAsync = function (path) {
 
 export const importFiles = function (files) {
   let imported = {};
-  let keys     = files.keys();
+  let keys     = Object.keys(files);
   keys.forEach((item, index) => {
     let name       = item.replace(/(\.\/)/, "").replace(/(\.[^/.]+$)/, '');
     imported[name] = files(item);
