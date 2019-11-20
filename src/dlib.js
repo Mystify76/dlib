@@ -470,9 +470,10 @@ export const generatePassword = function (lowerCase = false, upperCase = true, n
  * Get's a parameter from a request object that is either in the query property or the body property
  * @param req - the request object
  * @param prop - optional - if specified, it will return the value of the specific query/body property instead of the full object.
+ * @param defaultValue
  * @returns the value of the property
  */
-export const getReqProp = function (req, prop = undefined) {
+export const getReqProp = function (req, prop = undefined, defaultValue = undefined) {
   if (!req) return undefined;
 
   let values = undefined;
@@ -484,8 +485,7 @@ export const getReqProp = function (req, prop = undefined) {
   else if (req.body && !_.isEmpty(req.body)) values = req.body;
   else if (req.query && !_.isEmpty(req.query)) values = req.body;
 
-  if (!values || !prop) return values;
-  return values[prop];
+  return _.get(values, [prop], defaultValue);
 };
 
 /**
@@ -1682,7 +1682,7 @@ export const importFiles = function (files) {
   let keys     = Object.keys(files);
   keys.forEach((item, index) => {
     let name       = item.replace(/(\.\/)/, "").replace(/(\.[^/.]+$)/, '');
-    imported[name] = files(item);
+    imported[name] = files[item];
   });
   return imported;
 };
