@@ -1680,7 +1680,7 @@ const loadFileAsync = function (path) {
 const importFiles = function (files) {
   let imported = {};
   files.keys().forEach(key => {
-    imported[key] = files(key);
+    imported[key] = files(key).default;
   });
   return imported;
 };
