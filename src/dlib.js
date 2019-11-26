@@ -11,7 +11,7 @@ for (let i = 0; i < 256; i++) { lut[i] = (i < 16 ? '0' : '') + (i).toString(16);
  * Shamelessly stolen from someone else, but I don't remember who as it was a long time ago.
  * @returns {string}
  */
-export const UUID = function (noDash = false) {
+module.exports.UUID = function (noDash = false) {
   let d0 = Math.random() * 0xffffffff | 0;
   let d1 = Math.random() * 0xffffffff | 0;
   let d2 = Math.random() * 0xffffffff | 0;
@@ -28,7 +28,7 @@ export const UUID = function (noDash = false) {
  * @param int use parseInt if true, parseFloat if false. Default to false.
  * @returns {number}
  */
-export const toNumber = function (number, int = false) {
+module.exports.toNumber = function (number, int = false) {
   if (int) {
     return !isNaN(number) && !isNaN(parseInt(number)) ? parseInt(number) : undefined;
   } else {
@@ -41,7 +41,7 @@ export const toNumber = function (number, int = false) {
  * @param value The value to check
  * @returns {boolean}
  */
-export const isSafe = function (value) {
+module.exports.isSafe = function (value) {
   return !_.isNaN(value) && value !== undefined && value !== null;
 };
 
@@ -53,7 +53,7 @@ export const isSafe = function (value) {
  * @param trim If true, a trim() will be applied to the final string.
  * @returns {string}
  */
-export const combinePropsToString = function (obj, props = [], delimiter = " ", trim = true) {
+module.exports.combinePropsToString = function (obj, props = [], delimiter = " ", trim = true) {
   let value = props.map(path => _.get(obj, path, "")).join(delimiter);
   if (trim) value = value.trim();
   return value;
@@ -64,7 +64,7 @@ export const combinePropsToString = function (obj, props = [], delimiter = " ", 
  * @param html The value to check
  * @returns {string}
  */
-export const stripTags = function (html) {
+module.exports.stripTags = function (html) {
   let div       = document.createElement("div");
   div.innerHTML = html;
   return div.textContent || div.innerText || "";
@@ -75,7 +75,7 @@ export const stripTags = function (html) {
  * @param rect The value to check
  * @returns {object}
  */
-export const rectToObject = function (rect) {
+module.exports.rectToObject = function (rect) {
   return {
     left  : rect.left,
     right : rect.right,
@@ -91,7 +91,7 @@ export const rectToObject = function (rect) {
  * @param obj The object to check
  * @returns {object}
  */
-export const removeFunctions = function (obj) {
+module.exports.removeFunctions = function (obj) {
   return _.omitBy(obj, (value, key) => {
     if (_.isObject(value)) return removeFunctions(value);
     return typeof value === "function";
@@ -104,7 +104,7 @@ export const removeFunctions = function (obj) {
  * @param iterator the function iterator to use.
  * @returns {object}
  */
-export const findLast = function (array, iterator) {
+module.exports.findLast = function (array, iterator) {
   return array.slice().reverse().find((obj, index) => iterator(obj, (array.length - 1) - index));
 };
 
@@ -114,7 +114,7 @@ export const findLast = function (array, iterator) {
  * @param iterator the function iterator to use.
  * @returns {number}
  */
-export const findLastIndex = function (array, iterator) {
+module.exports.findLastIndex = function (array, iterator) {
   return (array.length - 1) - array.slice().reverse().findIndex(iterator);
 };
 
@@ -124,7 +124,7 @@ export const findLastIndex = function (array, iterator) {
  * @param circularReferences INTERNAL ONLY - tracks object references to prevent circular reference problems. You should not use this value.
  * @returns {number}
  */
-export const objectToDotPaths = function (source, circularReferences = []) {
+module.exports.objectToDotPaths = function (source, circularReferences = []) {
   let keys = [];
   if (circularReferences.some(obj => obj === source)) return keys;
   circularReferences.push(source);
@@ -146,7 +146,7 @@ export const objectToDotPaths = function (source, circularReferences = []) {
  * @param circularReferences INTERNAL ONLY - tracks object references to prevent circular reference problems. You should not use this value.
  * @returns {number}
  */
-export const objectToDotPathsAsync = function (source, circularReferences = []) {
+module.exports.objectToDotPathsAsync = function (source, circularReferences = []) {
   return new Promise((resolve, reject) => {
     let keys = [];
     if (circularReferences.some(obj => obj === source)) return resolve(keys);
@@ -185,7 +185,7 @@ export const objectToDotPathsAsync = function (source, circularReferences = []) 
  * @param prop the property to look for
  * @returns {object}
  */
-export const getArgWithProp = function (args, prop) {
+module.exports.getArgWithProp = function (args, prop) {
   let response = undefined;
   _.transform(args, (result, value, key, obj) => _.has(value, prop) ? !(response = value[prop]) : true);
   return response;
@@ -196,7 +196,7 @@ export const getArgWithProp = function (args, prop) {
  * @param arr the array to check.
  * @returns {{arguments: Array, event: undefined}}
  */
-export const splitEvent = function (arr) {
+module.exports.splitEvent = function (arr) {
   let response = {
     arguments: _.clone(arr),
     event    : undefined
@@ -220,7 +220,7 @@ export const splitEvent = function (arr) {
  * @param removeSpaces option to allow space characters or not.
  * @returns {string}
  */
-export const normalize = function (str, removeSpaces = false) {
+module.exports.normalize = function (str, removeSpaces = false) {
   let re = new RegExp("((?!(\\w|\\.|@|_|-|!| )).)*", "g");
   str    = _.deburr(_.toLower(_.trim(str))).replace(re, "");
   if (removeSpaces) str = str.replace(/ /g, "");
@@ -231,7 +231,7 @@ export const normalize = function (str, removeSpaces = false) {
  * Get the browser user agent information
  * @returns {object}
  */
-export const userAgent = function () {
+module.exports.userAgent = function () {
   this.os         = typeof navigator === "object" ? (navigator.platform.match(/mac|win|linux/i) || ["other"])[0].toLowerCase() : "";
   this.ua         = typeof navigator === "object" ? navigator.userAgent : "";
   this.OS         = {
@@ -271,7 +271,7 @@ export const userAgent = function () {
  * @param arrays - the arrays to concat.
  * @return {Array} - the compacted and concatenated array
  */
-export const concatSm = function (...arrays) {
+module.exports.concatSm = function (...arrays) {
   return _.compact(_.concat(...arrays));
 };
 
@@ -282,7 +282,7 @@ export const concatSm = function (...arrays) {
  * @param trailer - if truncated, this will be appended to the end of the string.
  * @return {Array} - the compacted and concatenated array
  */
-export const truncate = function (string, length, trailer = "") {
+module.exports.truncate = function (string, length, trailer = "") {
   return _.truncate(string, {length: length, omission: trailer});
 };
 
@@ -291,7 +291,7 @@ export const truncate = function (string, length, trailer = "") {
  * @return {Array} - the compacted and concatenated array
  * @param object
  */
-export const removeEmptyProperties = function (object) {
+module.exports.removeEmptyProperties = function (object) {
   let keys = _.keys(object);
   keys.forEach(key => {
     if (_.isObjectLike(object[key])) removeEmptyProperties(object[key]);
@@ -306,7 +306,7 @@ export const removeEmptyProperties = function (object) {
  * @param component
  * @return component
  */
-export const addKeys = function (react, component) {
+module.exports.addKeys = function (react, component) {
   if (!react || !component) return component;
   const isValidElement = react.isValidElement;
   const cloneElement   = react.cloneElement;
@@ -326,7 +326,7 @@ export const addKeys = function (react, component) {
  * @return array
  * @param array
  */
-export const randomizeArray = function (array) {
+module.exports.randomizeArray = function (array) {
   array        = _.clone(array);
   let newArray = [];
   while (array.length > 0) {
@@ -343,7 +343,7 @@ export const randomizeArray = function (array) {
  * @param showCurrency
  * @return {string}
  */
-export const formatCurrency = function (amount, currency, locale, showCurrency = true) {
+module.exports.formatCurrency = function (amount, currency, locale, showCurrency = true) {
   amount   = amount || 0;
   currency = currency || "USD";
   locale   = locale || "en-CA";
@@ -357,7 +357,7 @@ export const formatCurrency = function (amount, currency, locale, showCurrency =
  * @param string
  * @return {*}
  */
-export const escapeRegEx = function (string) {
+module.exports.escapeRegEx = function (string) {
   return string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 };
 
@@ -368,7 +368,7 @@ export const escapeRegEx = function (string) {
  * @param locale
  * @return {number}
  */
-export const unformatCurrency = function (formattedValue, currency, locale) {
+module.exports.unformatCurrency = function (formattedValue, currency, locale) {
   let cf          = new Intl.NumberFormat(locale, {style: 'currency', currency: currency, currencyDisplay: "code"});
   let options     = cf.resolvedOptions();
   let parts       = cf.formatToParts(9999.99);
@@ -391,7 +391,7 @@ export const unformatCurrency = function (formattedValue, currency, locale) {
  * @param email
  * @param emptyIsValid
  */
-export const isEmailValid = function (email, emptyIsValid = false) {
+module.exports.isEmailValid = function (email, emptyIsValid = false) {
   if (!email) return emptyIsValid;
   let parts = email.split("@");
   if (parts.length !== 2) return false;
@@ -411,7 +411,7 @@ export const isEmailValid = function (email, emptyIsValid = false) {
  * This function will mutate the object.
  * @returns {object}
  */
-export const setDocumentValue = function (object, path, value) {
+module.exports.setDocumentValue = function (object, path, value) {
   if (!object || !path) return object;
   if (!_.isArray(path)) path = _.split(path, ".");
 
@@ -434,7 +434,7 @@ export const setDocumentValue = function (object, path, value) {
  * Generate a random password
  * @returns {string}
  */
-export const generatePassword = function (lowerCase = false, upperCase = true, numbers = true, symbols = false, minLength = 8, maxLength = 8, allowDuplicates = true, preventRepeatingCharacters = true, excludeConfusing = true) {
+module.exports.generatePassword = function (lowerCase = false, upperCase = true, numbers = true, symbols = false, minLength = 8, maxLength = 8, allowDuplicates = true, preventRepeatingCharacters = true, excludeConfusing = true) {
   let availableCharacters = "";
   if (lowerCase) availableCharacters += "abcdefghijklmnopqrstuvwxyz";
   if (upperCase) availableCharacters += "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -473,7 +473,7 @@ export const generatePassword = function (lowerCase = false, upperCase = true, n
  * @param defaultValue
  * @returns {(number|string|object|boolean)}
  */
-export const getReqProp = function (req, prop = undefined, defaultValue = undefined) {
+module.exports.getReqProp = function (req, prop = undefined, defaultValue = undefined) {
   if (!req) return undefined;
 
   let values = undefined;
@@ -493,7 +493,7 @@ export const getReqProp = function (req, prop = undefined, defaultValue = undefi
  * @param classes - one or more objects
  * @returns {object} - a new object of all the properties of each object merged together.
  * **/
-export const mergeClasses = function(...classes) {
+module.exports.mergeClasses = function(...classes) {
   classes = _.compact(classes);
   classes = classes.filter(cls => _.isObjectLike(cls));
   if(classes.length === 0) return {};
@@ -513,7 +513,7 @@ export const mergeClasses = function(...classes) {
  * @param token the moment.js token
  * @returns {string}
  */
-export const getDateFormatTokenType = function (token) {
+module.exports.getDateFormatTokenType = function (token) {
   switch (token) {
     case "M":
     case "Mo":
@@ -592,7 +592,7 @@ export const getDateFormatTokenType = function (token) {
  * @param token the moment.js token
  * @returns {string}
  */
-export const getDateFormatTokenUnit = function (token) {
+module.exports.getDateFormatTokenUnit = function (token) {
   switch (token) {
     case "M":
     case "Mo":
@@ -671,7 +671,7 @@ export const getDateFormatTokenUnit = function (token) {
  * @param format the moment.js format string
  * @returns {string}
  */
-export const dateFormatToArray = function (format) {
+module.exports.dateFormatToArray = function (format) {
   let tokens = ["M", "Mo", "MM", "MMM", "MMMM", "Q", "Qo", "D", "Do", "DD", "DDD", "DDDo", "DDDD", "d", "do", "dd", "ddd", "dddd", "e", "E", "w", "wo", "ww", "W", "Wo", "WW", "YY", "YYYY", "Y", "gg", "gggg", "GG", "GGGG", "A", "a", "H", "HH", "h", "hh", "k", "kk", "m", "mm", "s", "ss", "S", "SS", "SSS", "Z", "ZZ", "X", "x"];
   // because I am too lazy to sort the array manually.
   tokens.sort((a, b) => {
@@ -718,7 +718,7 @@ export const dateFormatToArray = function (format) {
  * @param format the moment.js format string
  * @returns {string}
  */
-export const dateFormatToMask = function (format) {
+module.exports.dateFormatToMask = function (format) {
   if (!format) return undefined;
 
   let mask = dateFormatToArray(format);
@@ -800,12 +800,12 @@ export const dateFormatToMask = function (format) {
   return mask;
 };
 
-export const showTimeUnit         = {
+module.exports.showTimeUnit         = {
   always : "always",
   nonZero: "nonZero",
   never  : "never"
 };
-export const toTimeStringDefaults = {showDays: "nonZero", showHours: "nonZero", showMinutes: "nonZero", showSeconds: "nonZero", showMilliseconds: "never", padDays: false, padHours: false, padMinutes: false, padSeconds: false, formatNumber: true};
+module.exports.toTimeStringDefaults = {showDays: "nonZero", showHours: "nonZero", showMinutes: "nonZero", showSeconds: "nonZero", showMilliseconds: "never", padDays: false, padHours: false, padMinutes: false, padSeconds: false, formatNumber: true};
 
 /**
  * Convert a number in milliseconds to a time formatted string in dd:hh:m:ss.ms
@@ -813,7 +813,7 @@ export const toTimeStringDefaults = {showDays: "nonZero", showHours: "nonZero", 
  * @param options show or hide time units.
  * @returns {string}
  */
-export const toTimeString = function (number, options = toTimeStringDefaults) {
+module.exports.toTimeString = function (number, options = toTimeStringDefaults) {
   let result, d, h, m, s, x;
   if (_.isNil(number) || _.isNaN(number) || !_.isFinite(number)) return undefined;
   _.defaults(options, toTimeStringDefaults);
@@ -902,7 +902,7 @@ export const toTimeString = function (number, options = toTimeStringDefaults) {
  * @param number A number in milliseconds
  * @returns {number}
  */
-export const trimTime = function (number) {
+module.exports.trimTime = function (number) {
   let d = new Date(number);
   return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0).getTime();
 };
@@ -912,7 +912,7 @@ export const trimTime = function (number) {
  * @returns {number}
  * @param object
  */
-export const objectToDate = function (object) {
+module.exports.objectToDate = function (object) {
   return new Date(object.year, object.month - 1, object.day, object.hour || object.hours || 0, object.minute || object.minutes || 0, object.second || object.seconds || 0);
 };
 
@@ -924,7 +924,7 @@ export const objectToDate = function (object) {
  * @param objectToCompareTo second object to check
  * @returns {object}
  */
-export const differenceObj = function (objectToCompareFrom, objectToCompareTo) {
+module.exports.differenceObj = function (objectToCompareFrom, objectToCompareTo) {
   function changes(object, base) {
     return _.transform(object, function (result, value, key) {
       if (!_.isEqual(value, base[key])) {
@@ -944,7 +944,7 @@ export const differenceObj = function (objectToCompareFrom, objectToCompareTo) {
  * @param other the second object to compare
  * @returns {boolean}
  */
-export const areChildrenEqual = function (object, other) {
+module.exports.areChildrenEqual = function (object, other) {
   return _.isEqualWith(object, other, (object, other, key) => {
     if (_.isFunction(object) && _.isFunction(other)) return true;
     if (_.isString(key) && key.startsWith("_")) return true;
@@ -962,7 +962,7 @@ export const areChildrenEqual = function (object, other) {
  * @param ascending if true, the starting value will be 0, if false, the starting value will be 1.
  * @returns {number}
  */
-export const percent = function (percentage, maxValue = 1, minValue = 0, ascending = true) {
+module.exports.percent = function (percentage, maxValue = 1, minValue = 0, ascending = true) {
   return ((maxValue - minValue) * Math.max(0, Math.min(1, Math.abs(Number(ascending) - percentage)))) + minValue;
 };
 
@@ -975,7 +975,7 @@ export const percent = function (percentage, maxValue = 1, minValue = 0, ascendi
  * @param ascending if true, the starting value will be 0, if false, the starting value will be 1.
  * @returns {number}
  */
-export const percentf = function (numerator, denominator, maxValue = 1, minValue = 0, ascending = true) {
+module.exports.percentf = function (numerator, denominator, maxValue = 1, minValue = 0, ascending = true) {
   return ((maxValue - minValue) * Math.max(0, Math.min(1, Math.abs(Number(!ascending) - (numerator / denominator))))) + minValue;
 };
 
@@ -984,7 +984,7 @@ export const percentf = function (numerator, denominator, maxValue = 1, minValue
  * @param value the value to convert
  * @returns {string}
  */
-export const toHex = function (value) {
+module.exports.toHex = function (value) {
   let hex = value.toString(16);
   return hex.length === 1 ? "0" + hex : hex;
 };
@@ -995,7 +995,7 @@ export const toHex = function (value) {
  * @param max the higher number
  * @returns {number}
  */
-export const random = function (min, max) {
+module.exports.random = function (min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
@@ -1004,7 +1004,7 @@ export const random = function (min, max) {
  * @param rads
  * @returns {number}
  */
-export const toDegrees = function (rads) {
+module.exports.toDegrees = function (rads) {
   return rads * (180 / Math.PI);
 };
 
@@ -1013,7 +1013,7 @@ export const toDegrees = function (rads) {
  * @param degs
  * @returns {number}
  */
-export const toRadians = function (degs) {
+module.exports.toRadians = function (degs) {
   return degs * (Math.PI / 180);
 };
 
@@ -1025,7 +1025,7 @@ export const toRadians = function (degs) {
  * @param y2
  * @returns {number}
  */
-export const getDistanceBetweenCoords = function (x1, y1, x2, y2) {
+module.exports.getDistanceBetweenCoords = function (x1, y1, x2, y2) {
   let dx = x2 - x1;
   let dy = y2 - y1;
   return Math.sqrt((dx * dx) + (dy * dy));
@@ -1037,7 +1037,7 @@ export const getDistanceBetweenCoords = function (x1, y1, x2, y2) {
  * @param dy
  * @returns {number}
  */
-export const getDistanceDelta = function (dx, dy) {
+module.exports.getDistanceDelta = function (dx, dy) {
   return Math.sqrt((dx * dx) + (dy * dy));
 };
 
@@ -1050,7 +1050,7 @@ export const getDistanceDelta = function (dx, dy) {
  * @param distanceFromX1Y1 distance from x1, y1
  * @returns {number}
  */
-export const getPointOnLine = function (x1, y1, x2, y2, distanceFromX1Y1) {
+module.exports.getPointOnLine = function (x1, y1, x2, y2, distanceFromX1Y1) {
   let d = getDistanceBetweenCoords(x1, y1, x2, y2);
   if (d === 0) return [x1, y1];
 
@@ -1067,7 +1067,7 @@ export const getPointOnLine = function (x1, y1, x2, y2, distanceFromX1Y1) {
  * @param percentageBetweenFromX1Y1 Percentage distance between 0 and 1 from x1,y1 to x2,y2
  * @returns {number}
  */
-export const getPointOnLinePercentage = function (x1, y1, x2, y2, percentageBetweenFromX1Y1) {
+module.exports.getPointOnLinePercentage = function (x1, y1, x2, y2, percentageBetweenFromX1Y1) {
   let deltaX = (x2 - x1);
   let deltaY = (y2 - y1);
   let x      = x1 + (deltaX * percentageBetweenFromX1Y1);
@@ -1082,7 +1082,7 @@ export const getPointOnLinePercentage = function (x1, y1, x2, y2, percentageBetw
  * @param distanceFromPointA distance from a
  * @returns {number}
  */
-export const getPointOnLine2D = function (a, b, distanceFromPointA) {
+module.exports.getPointOnLine2D = function (a, b, distanceFromPointA) {
   let d   = b - a;
   let per = distanceFromPointA / d;
   return a + (d * per);
@@ -1095,7 +1095,7 @@ export const getPointOnLine2D = function (a, b, distanceFromPointA) {
  * @param percentageFromPointA Percentage distance between 0 and 1 from a to b
  * @returns {number}
  */
-export const getPointOnLine2DPercentage = function (a, b, percentageFromPointA) {
+module.exports.getPointOnLine2DPercentage = function (a, b, percentageFromPointA) {
   let d = (b - a);
   return a + (d * percentageFromPointA);
 };
@@ -1114,7 +1114,7 @@ export const getPointOnLine2DPercentage = function (a, b, percentageFromPointA) 
  * @param steps the total number of steps to take between x1,y1 and x2,y2
  * @returns {number}
  */
-export const getBezierPoint = function (x1, y1, x2, y2, cx1, cy1, cx2, cy2, step, steps) {
+module.exports.getBezierPoint = function (x1, y1, x2, y2, cx1, cy1, cx2, cy2, step, steps) {
   return getBezierPointPercentage(x1, y1, x2, y2, cx1, cy1, cx2, cy2, step / steps);
 };
 
@@ -1131,7 +1131,7 @@ export const getBezierPoint = function (x1, y1, x2, y2, cx1, cy1, cx2, cy2, step
  * @param percentage value from 0 to 1 for distance from x1,y1 to x2,y2
  * @returns {number}
  */
-export const getBezierPointPercentage = function (x1, y1, x2, y2, cx1, cy1, cx2, cy2, percentage) {
+module.exports.getBezierPointPercentage = function (x1, y1, x2, y2, cx1, cy1, cx2, cy2, percentage) {
   let x = getBezier2DPercentage(x1, x2, cx1, cx2, percentage);
   let y = getBezier2DPercentage(y1, y2, cy1, cy2, percentage);
   return {x, y};
@@ -1147,7 +1147,7 @@ export const getBezierPointPercentage = function (x1, y1, x2, y2, cx1, cy1, cx2,
  * @param steps the total number of steps to take between p1 and p2
  * @returns {number}
  */
-export const getBezier2D = function (p1, p2, cp1, cp2, step, steps) {
+module.exports.getBezier2D = function (p1, p2, cp1, cp2, step, steps) {
   return getBezier2DPercentage(p1, p2, cp1, cp2, step / steps);
 };
 
@@ -1160,7 +1160,7 @@ export const getBezier2D = function (p1, p2, cp1, cp2, step, steps) {
  * @param percentage value from 0 to 1 for distance from p1 to p2
  * @returns {number}
  */
-export const getBezier2DPercentage = function (p1, p2, cp1, cp2, percentage) {
+module.exports.getBezier2DPercentage = function (p1, p2, cp1, cp2, percentage) {
   let C = 3 * (cp1 - p1);
   let B = 3 * (cp2 - cp1) - C;
   let A = p2 - p1 - C - B;
@@ -1179,7 +1179,7 @@ export const getBezier2DPercentage = function (p1, p2, cp1, cp2, percentage) {
  * @param color an rgb() string, rgba() string, or hex color string (# or 0x)
  * @returns {object}
  */
-export const colorToRGBA = function (color) {
+module.exports.colorToRGBA = function (color) {
   let newColor = {r: 0, g: 0, b: 0, a: 1};
 
   try {
@@ -1233,7 +1233,7 @@ export const colorToRGBA = function (color) {
  * @param alpha optional - the alpha color between 0 and 255 - omit if r is color object
  * @returns {string}
  */
-export const rgbaToHex = function (red, green, blue, alpha) {
+module.exports.rgbaToHex = function (red, green, blue, alpha) {
   let {r, g, b, a} = _.isObjectLike(red) && _.has(red, ["r"]) && _.has(red, ["g"]) && _.has(red, ["b"]) ? red : _.isString(red) ? colorToRGBA(red) : {r: red, g: green, b: blue, a: alpha};
   if (_.isNil(r) || _.isNil(g) || _.isNil(b)) return undefined;
 
@@ -1251,7 +1251,7 @@ export const rgbaToHex = function (red, green, blue, alpha) {
  * @param color - the object containing r, g, b, and a properties.
  * @returns {string}
  */
-export const rgbaToString = function (color) {
+module.exports.rgbaToString = function (color) {
   if (!color) color = {};
   if (!color.r) color.r = 0;
   if (!color.g) color.g = 0;
@@ -1264,7 +1264,7 @@ export const rgbaToString = function (color) {
  * @param hexColor = the hex color as in #000000 or #000
  * @param a - optional alpha channel, if omitted, an RGB string will be returned instead of RGBA
  */
-export const hexToRGBA = function (hexColor, a) {
+module.exports.hexToRGBA = function (hexColor, a) {
   if (!hexColor) return undefined;
   if (hexColor === "transparent") return 0;
   let color = colorToRGBA(hexColor);
@@ -1282,7 +1282,7 @@ export const hexToRGBA = function (hexColor, a) {
  * @param to the color that the from will be blended towards
  * @returns {string}
  */
-export const colorBlend = function (percentage, from, to) {
+module.exports.colorBlend = function (percentage, from, to) {
   if (_.isNil(percentage) || _.isNil(from) || _.isNil(to)) return undefined;
   if (typeof (percentage) !== "number") return undefined;
   if (percentage === 0) return from;
@@ -1313,7 +1313,7 @@ export const colorBlend = function (percentage, from, to) {
  * @param color string or object - can be a 3 or 6 character hex value ("#000" or "#000000), a string starting with rgb or rgba ("rgb(#, #, #, #)") or an object containing rgba properties ({r:#, g:#, b:#, a:#}) - (alpha values are optional and not changed)
  * @returns {number|undefined}
  */
-export const getBrightness = function (color) {
+module.exports.getBrightness = function (color) {
   if (_.isNil(color)) return undefined;
   try {
     let {r, g, b} = _.isObjectLike(color) && _.has(color, ["r"]) && _.has(color, ["g"]) && _.has(color, ["b"]) ? color : colorToRGBA(color);
@@ -1331,7 +1331,7 @@ export const getBrightness = function (color) {
  * @param brightnessOffset
  * @returns {boolean|undefined}
  */
-export const isDark = function (color, brightnessOffset = 0) {
+module.exports.isDark = function (color, brightnessOffset = 0) {
   return getBrightness(color) < 123 + brightnessOffset;
 };
 
@@ -1346,7 +1346,7 @@ export const isDark = function (color, brightnessOffset = 0) {
  * @param keepAspectRatio if true, aspect ratio will be maintained based on whatever ratio is higher
  * @returns {string}
  */
-export const resizeImage = function (document, imgSource, targetWidth, targetHeight, keepAspectRatio = true) {
+module.exports.resizeImage = function (document, imgSource, targetWidth, targetHeight, keepAspectRatio = true) {
   return new Promise((resolve, reject, onCancel) => {
     let cancelled = false;
     onCancel && onCancel(() => cancelled = true);
@@ -1422,14 +1422,14 @@ export const resizeImage = function (document, imgSource, targetWidth, targetHei
  * @param element
  * @returns {object}
  */
-export const getBoundingClientRect = (element) => {
+module.exports.getBoundingClientRect = (element) => {
   return new rect(element.getBoundingClientRect());
 };
 
 /**
  * an as close as I can get copy of the rectangle object (usually returned by the getBoundingClientRect) that allowed changes
  */
-export const rect = class rect {
+module.exports.rect = class rect {
   constructor(top = 0, right = 0, bottom = 0, left = 0, x = 0, y = 0) {
     this.set(top, right, bottom, left, x, y);
   }
@@ -1546,14 +1546,14 @@ export const rect = class rect {
  * Shortcut function to get the size of the browser viewport
  * @returns {object}
  */
-export const getViewport = function () {
+module.exports.getViewport = function () {
   let w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
   let h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
 
   return {width: w, height: h};
 };
 
-export const focusNextElement = function () {
+module.exports.focusNextElement = function () {
   let currentFocus = document.activeElement;
   let elements     = [...document.querySelectorAll("a[href]:not([tabindex='-1']), area[href]:not([tabindex='-1']), input:not([disabled]):not([tabindex='-1']), select:not([disabled]):not([tabindex='-1']), textarea:not([disabled]):not([tabindex='-1']), button:not([disabled]):not([tabindex='-1']), iframe:not([tabindex='-1']), [tabindex]:not([tabindex='-1']), [contentEditable=true]:not([tabindex='-1'])")];
   elements.sort((a, b) => parseInt(a.tabIndex || 0) - parseInt(b.tabIndex || 0));
@@ -1569,7 +1569,7 @@ export const focusNextElement = function () {
  * @param size number in bytes
  * @returns {string}
  */
-export const getFileSizeBaseUnit = function (size) {
+module.exports.getFileSizeBaseUnit = function (size) {
   if (size < 1000) return "b";
   if (size < 1000000) return "kb";
   if (size < 1000000000) return "mb";
@@ -1585,7 +1585,7 @@ export const getFileSizeBaseUnit = function (size) {
  * @param addUnit if true, the unit characters will be appended to the string.
  * @returns {string}
  */
-export const getFileSizeString = function (size, unit = "b", decimals = 0, addUnit = true) {
+module.exports.getFileSizeString = function (size, unit = "b", decimals = 0, addUnit = true) {
   unit = _.toUpper(unit);
   if (unit !== "B" && unit !== "KB" && unit !== "MB" && unit !== "GB" && unit !== "TB") unit = "KB";
   if (_.isNil(size)) size = 0;
@@ -1613,7 +1613,7 @@ export const getFileSizeString = function (size, unit = "b", decimals = 0, addUn
  * @param sep the path separator.
  * @returns {array}
  */
-export const pathSorter = function (sep = "/") {
+module.exports.pathSorter = function (sep = "/") {
   return function (aValue, bValue) {
     let a = aValue.split(sep);
     let b = bValue.split(sep);
@@ -1630,7 +1630,7 @@ export const pathSorter = function (sep = "/") {
   }
 };
 
-export const sort = function (arr, locale, path = undefined, caseInsensitive = false, trim = false) {
+module.exports.sort = function (arr, locale, path = undefined, caseInsensitive = false, trim = false) {
   let collator = new Intl.Collator(locale || "en-CA", {sensitivity: 'base'});
   arr.sort((valA, valB) => {
     if (path) valA = _.get(valA, [path]);
@@ -1659,7 +1659,7 @@ export const sort = function (arr, locale, path = undefined, caseInsensitive = f
  * @param path the path and filename to load.
  * @returns {string}
  */
-export const loadFileAsync = function (path) {
+module.exports.loadFileAsync = function (path) {
   return new Promise((resolve, reject) => {
     let xhr                = new XMLHttpRequest();
     xhr.onreadystatechange = function () {
@@ -1677,7 +1677,7 @@ export const loadFileAsync = function (path) {
   });
 };
 
-export const importFiles = function (files) {
+module.exports.importFiles = function (files) {
   let imported = {};
   let keys     = Object.keys(files);
   keys.forEach((item, index) => {
@@ -1694,7 +1694,7 @@ export const importFiles = function (files) {
  * @param document - reference to the document object.
  * @param str - the string to put into the clipboard.
  */
-export const copyToClipboard = function (document, str) {
+module.exports.copyToClipboard = function (document, str) {
   const el = document.createElement('textarea');
   el.value = str;
   el.setAttribute('readonly', '');
@@ -1705,17 +1705,4 @@ export const copyToClipboard = function (document, str) {
   document.execCommand('copy');
   document.body.removeChild(el);
 };
-
-// module.exports = {
-//   UUID, toNumber, isSafe, combinePropsToString, stripTags, rectToObject, removeFunctions,
-//   findLast, findLastIndex, objectToDotPaths, objectToDotPathsAsync, getArgWithProp, splitEvent, normalize,
-//   userAgent, concatSm, truncate, removeEmptyProperties, addKeys, randomizeArray, formatCurrency, escapeRegEx,
-//   unformatCurrency, isEmailValid, getDateFormatTokenType, getDateFormatTokenUnit, dateFormatToArray, dateFormatToMask,
-//   showTimeUnit, toTimeStringDefaults, toTimeString, trimTime, objectToDate, differenceObj, areChildrenEqual, percent,
-//   percentf, toHex, random, toDegrees, toRadians, getDistanceBetweenCoords, getDistanceDelta, getPointOnLine, getPointOnLinePercentage,
-//   getPointOnLine2D, getPointOnLine2DPercentage, getBezierPoint, getBezierPointPercentage, getBezier2D, getBezier2DPercentage,
-//   colorToRGBA, rgbaToHex, rgbaToString, hexToRGBA, colorBlend, getBrightness, isDark, resizeImage, getBoundingClientRect, rect,
-//   getViewport, focusNextElement, getFileSizeBaseUnit, getFileSizeString, pathSorter, sort, loadFileAsync, importFiles,
-//   copyToClipboard, setDocumentValue, generatePassword, getReqProp
-// };
 
