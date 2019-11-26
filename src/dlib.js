@@ -432,7 +432,7 @@ export const setDocumentValue = function (object, path, value) {
 
 /**
  * Generate a random password
- * @returns string
+ * @returns {string}
  */
 export const generatePassword = function (lowerCase = false, upperCase = true, numbers = true, symbols = false, minLength = 8, maxLength = 8, allowDuplicates = true, preventRepeatingCharacters = true, excludeConfusing = true) {
   let availableCharacters = "";
@@ -471,7 +471,7 @@ export const generatePassword = function (lowerCase = false, upperCase = true, n
  * @param req - the request object
  * @param prop - optional - if specified, it will return the value of the specific query/body property instead of the full object.
  * @param defaultValue
- * @returns the value of the property
+ * @returns {(number|string|object|boolean)}
  */
 export const getReqProp = function (req, prop = undefined, defaultValue = undefined) {
   if (!req) return undefined;
@@ -491,7 +491,7 @@ export const getReqProp = function (req, prop = undefined, defaultValue = undefi
 /**
  * takes 2 or more objects with string properties and merges all the properties into single strings.
  * @param classes - one or more objects
- * @returns object - a new object of all the properties of each object merged together.
+ * @returns {object} - a new object of all the properties of each object merged together.
  * **/
 export const mergeClasses = function(...classes) {
   classes = _.compact(classes);
