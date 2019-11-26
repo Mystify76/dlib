@@ -1,12 +1,30 @@
 {
   "name": "@mystify/dlib",
-  "version": "0.9.12",
+  "version": "1.0.0",
   "description": "A collection of simple shortcut functions I use across various projects. Mainly for ES6, React, and NodeJS",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "build": "cross-env NODEENV=production BUILDING=true webpack --config webpack.config.js --colors -p "
+  },
   "author": "David Gallant",
   "license": "MIT",
-  "devDependencies": {},
+  "devDependencies": {
+    "@babel/cli": "^7.6.4",
+    "@babel/core": "^7.6.4",
+    "@babel/plugin-proposal-class-properties": "^7.5.5",
+    "@babel/plugin-proposal-decorators": "^7.6.0",
+    "@babel/plugin-proposal-object-rest-spread": "^7.6.2",
+    "@babel/plugin-syntax-decorators": "^7.2.0",
+    "@babel/plugin-syntax-dynamic-import": "^7.2.0",
+    "@babel/plugin-transform-runtime": "^7.6.2",
+    "@babel/preset-env": "^7.6.3",
+    "babel-plugin-module-resolver": "^3.2.0",
+    "cross-env": "^6.0.3",
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.9",
+    "babel-loader": "^8.0.6",
+    "babel-plugin-lodash": "^3.3.4"
+  },
   "dependencies": {
     "lodash": "^4.17.15",
     "bluebird": "^3.7.0"
