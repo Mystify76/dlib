@@ -1,2 +1,3 @@
 'use strict';
-module.exports = require("./dlib");
+const dlib = require("./dlib");
+module.exports = new dlib;
