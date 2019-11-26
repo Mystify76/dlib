@@ -1,2 +1,2 @@
 'use strict';
-module.exports = require("./dist/dlib");
+module.exports = require("./src/dlib");

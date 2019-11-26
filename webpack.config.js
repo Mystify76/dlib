@@ -6,33 +6,24 @@ const isProduction = NODEENV === 'production';
 
 module.exports = {
   mode: NODEENV,
-  entry  : './src/index.js',
+  entry  : './src/dlib.js',
   output : {
     path    : path.resolve(__dirname, 'dist'),
     filename: 'dlib.js'
   },
   module : {
-    rules: [
-      {
-        test   : /\.js$/,
-        exclude: /node_modules/,
-        use    : {
-          loader : 'babel-loader',
-          options: {
-            'plugins': [
-              "lodash",
-              "@babel/plugin-syntax-dynamic-import",
-              "@babel/plugin-transform-runtime",
-              ["@babel/plugin-proposal-decorators", {"legacy": true}],
-              ["@babel/plugin-proposal-class-properties", {"loose": true}],
-              ["@babel/plugin-syntax-decorators", {"legacy": true}],
-              "@babel/plugin-proposal-object-rest-spread"
-            ],
-            'presets': [["@babel/preset-env", {"targets": {"esmodules": false, "node": "current"}}]]
-          }
-        }
-      }
-    ]
+    // rules: [
+    //   {
+    //     test   : /\.js$/,
+    //     exclude: /node_modules/,
+    //     use    : {
+    //       loader : 'babel-loader',
+    //       options: {
+    //         'presets': [["@babel/preset-env", {"targets": {"esmodules": true, "node": "current"}}]]
+    //       }
+    //     }
+    //   }
+    // ]
   },
   stats  : {
     colors: true
