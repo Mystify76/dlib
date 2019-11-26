@@ -1680,7 +1680,8 @@ const loadFileAsync = function (path) {
 const importFiles = function (files) {
   let imported = {};
   files.keys().forEach(key => {
-    imported[key] = files(key).replace(/(\.\/)/, "").replace(/(\.[^/.]+$)/, '');
+    imported[key] = files(key).default;
+    imported[key] = imported[key].replace(/(\.\/)/, "").replace(/(\.[^/.]+$)/, '');
   });
   return imported;
 };
