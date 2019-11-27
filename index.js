@@ -981,10 +981,10 @@ dlib.toTimeStringDefaults = {showDays: "nonZero", showHours: "nonZero", showMinu
  * @param options show or hide time units.
  * @returns {string}
  */
-dlib.toTimeString = function (number, options = toTimeStringDefaults) {
+dlib.toTimeString = function (number, options ={}) {
   let result, d, h, m, s, x;
   if (_.isNil(number) || _.isNaN(number) || !_.isFinite(number)) return undefined;
-  _.defaults(options, toTimeStringDefaults);
+  _.defaults(options, this.toTimeStringDefaults);
 
   let isNegative = number < 0;
   if (isNegative) number = Math.abs(number);
