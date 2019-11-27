@@ -1,14 +1,15 @@
 {
   "name": "@mystify/dlib",
-  "version": "1.0.11",
+  "version": "1.0.13",
   "description": "A collection of simple shortcut functions I use across various projects. Mainly for ES6, React, and NodeJS",
   "main": "index.js",
   "author": "David Gallant",
   "license": "MIT",
   "devDependencies": {},
   "dependencies": {
-    "lodash": "^4.17.15",
-    "bluebird": "^3.7.0"
+    "bluebird": "^3.7.0",
+    "fs-extra": "^8.1.0",
+    "lodash": "^4.17.15"
   },
   "homepage": "https://github.com/Mystify76/dlib"
 }

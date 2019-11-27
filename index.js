@@ -5,13 +5,15 @@ Promise.config({warnings: {wForgottenReturn: false}, cancellation: true});
 let lut = [];
 for (let i = 0; i < 256; i++) { lut[i] = (i < 16 ? '0' : '') + (i).toString(16); }
 
+const dlib = {};
+
 /**
  * Generate a UUID.
  * @param noDash if true, dashes will not be included.
  * Shamelessly stolen from someone else, but I don't remember who as it was a long time ago.
  * @returns {string}
  */
-const UUID = function (noDash = false) {
+dlib.UUID = function (noDash = false) {
   let d0 = Math.random() * 0xffffffff | 0;
   let d1 = Math.random() * 0xffffffff | 0;
   let d2 = Math.random() * 0xffffffff | 0;
@@ -28,7 +30,7 @@ const UUID = function (noDash = false) {
  * @param int use parseInt if true, parseFloat if false. Default to false.
  * @returns {number}
  */
-const toNumber = function (number, int = false) {
+dlib.toNumber = function (number, int = false) {
   if (int) {
     return !isNaN(number) && !isNaN(parseInt(number)) ? parseInt(number) : undefined;
   } else {
@@ -41,7 +43,7 @@ const toNumber = function (number, int = false) {
  * @param value The value to check
  * @returns {boolean}
  */
-const isSafe = function (value) {
+dlib.isSafe = function (value) {
   return !_.isNaN(value) && value !== undefined && value !== null;
 };
 
@@ -53,7 +55,7 @@ const isSafe = function (value) {
  * @param trim If true, a trim() will be applied to the final string.
  * @returns {string}
  */
-const combinePropsToString = function (obj, props = [], delimiter = " ", trim = true) {
+dlib.combinePropsToString = function (obj, props = [], delimiter = " ", trim = true) {
   let value = props.map(path => _.get(obj, path, "")).join(delimiter);
   if (trim) value = value.trim();
   return value;
@@ -64,7 +66,7 @@ const combinePropsToString = function (obj, props = [], delimiter = " ", trim = 
  * @param html The value to check
  * @returns {string}
  */
-const stripTags = function (html) {
+dlib.stripTags = function (html) {
   let div       = document.createElement("div");
   div.innerHTML = html;
   return div.textContent || div.innerText || "";
@@ -75,7 +77,7 @@ const stripTags = function (html) {
  * @param rect The value to check
  * @returns {object}
  */
-const rectToObject = function (rect) {
+dlib.rectToObject = function (rect) {
   return {
     left  : rect.left,
     right : rect.right,
@@ -91,9 +93,9 @@ const rectToObject = function (rect) {
  * @param obj The object to check
  * @returns {object}
  */
-const removeFunctions = function (obj) {
+dlib.removeFunctions = function (obj) {
   return _.omitBy(obj, (value, key) => {
-    if (_.isObject(value)) return removeFunctions(value);
+    if (_.isObject(value)) return this.removeFunctions(value);
     return typeof value === "function";
   });
 };
@@ -104,7 +106,7 @@ const removeFunctions = function (obj) {
  * @param iterator the function iterator to use.
  * @returns {object}
  */
-const findLast = function (array, iterator) {
+dlib.findLast = function (array, iterator) {
   return array.slice().reverse().find((obj, index) => iterator(obj, (array.length - 1) - index));
 };
 
@@ -114,7 +116,7 @@ const findLast = function (array, iterator) {
  * @param iterator the function iterator to use.
  * @returns {number}
  */
-const findLastIndex = function (array, iterator) {
+dlib.findLastIndex = function (array, iterator) {
   return (array.length - 1) - array.slice().reverse().findIndex(iterator);
 };
 
@@ -124,14 +126,14 @@ const findLastIndex = function (array, iterator) {
  * @param circularReferences INTERNAL ONLY - tracks object references to prevent circular reference problems. You should not use this value.
  * @returns {number}
  */
-const objectToDotPaths = function (source, circularReferences = []) {
+dlib.objectToDotPaths = function (source, circularReferences = []) {
   let keys = [];
   if (circularReferences.some(obj => obj === source)) return keys;
   circularReferences.push(source);
 
   _.keys(source).forEach((key, index, arr) => {
     if (_.isObjectLike(source[key]) && !_.isDate(source[key])) {
-      let subKeys = objectToDotPaths(source[key], circularReferences);
+      let subKeys = this.objectToDotPaths(source[key], circularReferences);
       keys        = keys.concat(subKeys.map(subKey => key + "." + subKey));
     } else {
       keys.push(key);
@@ -146,7 +148,7 @@ const objectToDotPaths = function (source, circularReferences = []) {
  * @param circularReferences INTERNAL ONLY - tracks object references to prevent circular reference problems. You should not use this value.
  * @returns {number}
  */
-const objectToDotPathsAsync = function (source, circularReferences = []) {
+dlib.objectToDotPathsAsync = function (source, circularReferences = []) {
   return new Promise((resolve, reject) => {
     let keys = [];
     if (circularReferences.some(obj => obj === source)) return resolve(keys);
@@ -155,7 +157,7 @@ const objectToDotPathsAsync = function (source, circularReferences = []) {
     let promises = [];
     _.keys(source).forEach((key, index, arr) => {
       if (_.isObjectLike(source[key]) && !_.isDate(source[key])) {
-        promises.push(objectToDotPaths(source[key], circularReferences));
+        promises.push(this.objectToDotPaths(source[key], circularReferences));
       } else {
         keys.push(key);
       }
@@ -185,7 +187,7 @@ const objectToDotPathsAsync = function (source, circularReferences = []) {
  * @param prop the property to look for
  * @returns {object}
  */
-const getArgWithProp = function (args, prop) {
+dlib.getArgWithProp = function (args, prop) {
   let response = undefined;
   _.transform(args, (result, value, key, obj) => _.has(value, prop) ? !(response = value[prop]) : true);
   return response;
@@ -196,7 +198,7 @@ const getArgWithProp = function (args, prop) {
  * @param arr the array to check.
  * @returns {{arguments: Array, event: undefined}}
  */
-const splitEvent = function (arr) {
+dlib.splitEvent = function (arr) {
   let response = {
     arguments: _.clone(arr),
     event    : undefined
@@ -220,7 +222,7 @@ const splitEvent = function (arr) {
  * @param removeSpaces option to allow space characters or not.
  * @returns {string}
  */
-const normalize = function (str, removeSpaces = false) {
+dlib.normalize = function (str, removeSpaces = false) {
   let re = new RegExp("((?!(\\w|\\.|@|_|-|!| )).)*", "g");
   str    = _.deburr(_.toLower(_.trim(str))).replace(re, "");
   if (removeSpaces) str = str.replace(/ /g, "");
@@ -231,7 +233,7 @@ const normalize = function (str, removeSpaces = false) {
  * Get the browser user agent information
  * @returns {object}
  */
-const userAgent = function () {
+dlib.userAgent = function () {
   this.os         = typeof navigator === "object" ? (navigator.platform.match(/mac|win|linux/i) || ["other"])[0].toLowerCase() : "";
   this.ua         = typeof navigator === "object" ? navigator.userAgent : "";
   this.OS         = {
@@ -271,7 +273,7 @@ const userAgent = function () {
  * @param arrays - the arrays to concat.
  * @return {Array} - the compacted and concatenated array
  */
-const concatSm = function (...arrays) {
+dlib.concatSm = function (...arrays) {
   return _.compact(_.concat(...arrays));
 };
 
@@ -282,7 +284,7 @@ const concatSm = function (...arrays) {
  * @param trailer - if truncated, this will be appended to the end of the string.
  * @return {Array} - the compacted and concatenated array
  */
-const truncate = function (string, length, trailer = "") {
+dlib.truncate = function (string, length, trailer = "") {
   return _.truncate(string, {length: length, omission: trailer});
 };
 
@@ -291,13 +293,38 @@ const truncate = function (string, length, trailer = "") {
  * @return {Array} - the compacted and concatenated array
  * @param object
  */
-const removeEmptyProperties = function (object) {
+dlib.removeEmptyProperties = function (object) {
   let keys = _.keys(object);
   keys.forEach(key => {
-    if (_.isObjectLike(object[key])) removeEmptyProperties(object[key]);
+    if (_.isObjectLike(object[key])) this.removeEmptyProperties(object[key]);
     if (_.isEmpty(object[key]) && !_.isNumber(object[key]) && !_.isBoolean(object[key])) delete object[key];
   });
   return object;
+};
+
+/**
+ * Iterates over object properties and removes any that are nil.
+ * @param obj The object to check
+ * @param removeUndefined
+ * @param removeNull
+ * @param removeEmpty
+ * @param removeZero
+ * @param removeFalse
+ * @param removeOthers
+ * @returns {object}
+ */
+dlib.removeNilProperties = function (obj, removeUndefined = true, removeNull = true, removeEmpty = false, removeZero = false, removeFalse = false, removeOthers = undefined) {
+  let options = {removeUndefined, removeNull, removeEmpty, removeZero, removeFalse, removeOthers};
+  return removeNilPropertiesWorker(obj, options);
+};
+const removeNilPropertiesWorker  = function (obj, options) {
+  return _.omitBy(obj, removeNilPropertiesOmitter.bind(this, options));
+};
+const removeNilPropertiesOmitter = function (options, value, key) {
+  let result = false;
+  if (_.isObject(value)) value = removeNilPropertiesWorker(value, options);
+  result = (options.removeNull && _.isNull(value)) || (options.removeUndefined && _.isUndefined(value)) || (options.removeEmpty && _.isEmpty(value)) || (options.removeZero && value === 0) || (options.removeFalse && value === false) || (_.isArray(options.removeOthers) && options.removeOthers.some(remove => value === remove));
+  return result;
 };
 
 /**
@@ -306,7 +333,7 @@ const removeEmptyProperties = function (object) {
  * @param component
  * @return component
  */
-const addKeys = function (react, component) {
+dlib.addKeys = function (react, component) {
   if (!react || !component) return component;
   const isValidElement = react.isValidElement;
   const cloneElement   = react.cloneElement;
@@ -326,11 +353,11 @@ const addKeys = function (react, component) {
  * @return array
  * @param array
  */
-const randomizeArray = function (array) {
+dlib.randomizeArray = function (array) {
   array        = _.clone(array);
   let newArray = [];
   while (array.length > 0) {
-    newArray.push(array.splice(random(0, array.length - 1), 1));
+    newArray.push(array.splice(this.random(0, array.length - 1), 1));
   }
   return newArray;
 };
@@ -343,7 +370,7 @@ const randomizeArray = function (array) {
  * @param showCurrency
  * @return {string}
  */
-const formatCurrency = function (amount, currency, locale, showCurrency = true) {
+dlib.formatCurrency = function (amount, currency, locale, showCurrency = true) {
   amount   = amount || 0;
   currency = currency || "USD";
   locale   = locale || "en-CA";
@@ -357,7 +384,7 @@ const formatCurrency = function (amount, currency, locale, showCurrency = true) 
  * @param string
  * @return {*}
  */
-const escapeRegEx = function (string) {
+dlib.escapeRegEx = function (string) {
   return string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 };
 
@@ -368,16 +395,16 @@ const escapeRegEx = function (string) {
  * @param locale
  * @return {number}
  */
-const unformatCurrency = function (formattedValue, currency, locale) {
+dlib.unformatCurrency = function (formattedValue, currency, locale) {
   let cf          = new Intl.NumberFormat(locale, {style: 'currency', currency: currency, currencyDisplay: "code"});
   let options     = cf.resolvedOptions();
   let parts       = cf.formatToParts(9999.99);
   let valCurrency = _.get(parts.find(obj => obj.type === "currency"), ["value"]);
   let valGroup    = _.get(parts.find(obj => obj.type === "group"), ["value"]);
   let valDecimal  = _.get(parts.find(obj => obj.type === "decimal"), ["value"]);
-  let reCurrency  = valCurrency ? new RegExp(escapeRegEx(valCurrency), "g") : undefined;
-  let reGroup     = (valGroup && options.useGrouping) ? new RegExp(escapeRegEx(valGroup), "g") : undefined;
-  let reDecimal   = valDecimal ? new RegExp(escapeRegEx(valDecimal), "g") : undefined;
+  let reCurrency  = valCurrency ? new RegExp(this.escapeRegEx(valCurrency), "g") : undefined;
+  let reGroup     = (valGroup && options.useGrouping) ? new RegExp(this.escapeRegEx(valGroup), "g") : undefined;
+  let reDecimal   = valDecimal ? new RegExp(this.escapeRegEx(valDecimal), "g") : undefined;
   if (reCurrency) formattedValue = formattedValue.replace(reCurrency, "");
   if (reGroup) formattedValue = formattedValue.replace(reGroup, "");
   if (reDecimal) formattedValue = formattedValue.replace(reDecimal, ".");
@@ -391,7 +418,7 @@ const unformatCurrency = function (formattedValue, currency, locale) {
  * @param email
  * @param emptyIsValid
  */
-const isEmailValid = function (email, emptyIsValid = false) {
+dlib.isEmailValid = function (email, emptyIsValid = false) {
   if (!email) return emptyIsValid;
   let parts = email.split("@");
   if (parts.length !== 2) return false;
@@ -411,7 +438,7 @@ const isEmailValid = function (email, emptyIsValid = false) {
  * This function will mutate the object.
  * @returns {object}
  */
-const setDocumentValue = function (object, path, value) {
+dlib.setDocumentValue = function (object, path, value) {
   if (!object || !path) return object;
   if (!_.isArray(path)) path = _.split(path, ".");
 
@@ -434,7 +461,7 @@ const setDocumentValue = function (object, path, value) {
  * Generate a random password
  * @returns {string}
  */
-const generatePassword = function (lowerCase = false, upperCase = true, numbers = true, symbols = false, minLength = 8, maxLength = 8, allowDuplicates = true, preventRepeatingCharacters = true, excludeConfusing = true) {
+dlib.generatePassword = function (lowerCase = false, upperCase = true, numbers = true, symbols = false, minLength = 8, maxLength = 8, allowDuplicates = true, preventRepeatingCharacters = true, excludeConfusing = true) {
   let availableCharacters = "";
   if (lowerCase) availableCharacters += "abcdefghijklmnopqrstuvwxyz";
   if (upperCase) availableCharacters += "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -443,14 +470,14 @@ const generatePassword = function (lowerCase = false, upperCase = true, numbers 
   if (excludeConfusing) availableCharacters = availableCharacters.replace(/[0OoiIlL1]/g, "");
   availableCharacters = availableCharacters.split(""); // just makes processing easier.
 
-  let length       = minLength === maxLength ? maxLength : random(minLength, maxLength);
+  let length       = minLength === maxLength ? maxLength : this.random(minLength, maxLength);
   let char         = undefined;
   let addAfterPick = undefined;
   let password     = "";
 
   while (password.length < length || availableCharacters.length < 1) {
     if (availableCharacters.length > 0) {
-      let index = random(0, availableCharacters.length - 1); // get a random letter index;
+      let index = this.random(0, availableCharacters.length - 1); // get a this.random letter index;
       char      = availableCharacters.splice(index, 1, "")[0]; // get that letter and remove it from the array.
       if (!_.isNil(addAfterPick)) { // if we are to put the letter back in the array after picking one to prevent repeats, do it now
         availableCharacters.push(addAfterPick);
@@ -473,7 +500,7 @@ const generatePassword = function (lowerCase = false, upperCase = true, numbers 
  * @param defaultValue
  * @returns {(number|string|object|boolean)}
  */
-const getReqProp = function (req, prop = undefined, defaultValue = undefined) {
+dlib.getReqProp = function (req, prop = undefined, defaultValue = undefined) {
   if (!req) return undefined;
 
   let values = undefined;
@@ -493,16 +520,158 @@ const getReqProp = function (req, prop = undefined, defaultValue = undefined) {
  * @param classes - one or more objects
  * @returns {object} - a new object of all the properties of each object merged together.
  * **/
-const mergeClasses = function(...classes) {
+dlib.mergeClasses = function (...classes) {
   classes = _.compact(classes);
   classes = classes.filter(cls => _.isObjectLike(cls));
-  if(classes.length === 0) return {};
-  let keys =  _.union(_.flatten(classes.map(cls => _.keys(cls))));
+  if (classes.length === 0) return {};
+  let keys          = _.union(_.flatten(classes.map(cls => _.keys(cls))));
   let mergedClasses = {};
-  for(let key of keys) {
-    mergedClasses[key] = cx(classes.map(cls => cls[key]));
+  for (let key of keys) {
+    mergedClasses[key] = _.compact(classes.map(cls => cls[key])).join(" ").trim();
   }
   return mergedClasses;
+};
+
+/**
+ * Takes a mongodb document object and converts it to a standard object. This function accepts an array of documents and will also convert any nested document objects aswell.
+ * @param obj - array of documents or a document object.
+ * @param removeDoubleUnderscoreProperties - if true, any properties that begin with __ will be removed.
+ * @return {object}
+ */
+dlib.convertToObject = function (obj, removeDoubleUnderscoreProperties = true) {
+  if (_.isNil(obj)) return obj;
+
+  function processObject(obj) {
+    if (_.isObjectLike(obj)) {
+      if (_.isArray(obj)) {
+        _.transform(obj, transformCB, obj);
+      }
+      else if (obj instanceof Object && (obj instanceof Date === false && obj instanceof RegExp === false && obj instanceof Array === false && obj instanceof Function === false)) {
+        if (obj.toObject && typeof obj.toObject === "function") {
+          obj = obj.toObject();
+          obj = _.omitBy(obj, (obj, key) => key.startsWith("__") || _.isFunction(obj));
+          _.transform(obj, transformCB, obj);
+        }
+      }
+    }
+    return obj;
+  }
+
+  function transformCB(accumulator, value, key, object) {
+    value            = processObject(value);
+    accumulator[key] = value;
+    return accumulator;
+  }
+
+  obj = processObject(obj);
+  return obj;
+};
+
+/**
+ * Function for parsing a string and returning all the words in the string as an array AND keeping strings inside of quotes together.
+ * @param string - the string to split.
+ * @param normalize - normalize the final array elements automatically
+ * @return object
+ */
+dlib.getSearchTerms = function (string, normalize = true) {
+  let results = (string || "").match(/".*?"|[\w.']+/g) || [];
+  results     = _.uniq(_.compact(results));
+  return normalize ? results.map(obj => this.normalize(obj)) : results;
+};
+
+/**
+ * This function mutates the object. Checks a aggregate query array and looks for invalid fields and removes them.
+ * This function currently checks for
+ * - undefined sort
+ * - undefined skip
+ * - undefined or 0 limit
+ * - undefined $project
+ * @param query
+ */
+dlib.cleanUpAggregateQuery = function (query) {
+  const checkChildren = child => {
+    if (_.isArray(child)) {
+      for (let i = 0; i < child.length; i++) {
+        if (checkChildren(child[i])) {
+          child.splice(i--, 1);
+        }
+      }
+      return false;
+    }
+    else if (_.isObjectLike(child) && !_.isDate(child) && !_.isRegExp(child)) {
+      let keys = _.keys(child);
+      keys.forEach(key => {
+        if (checkChildren(child[key])) {
+          delete child[key]
+        }
+        else {
+          if (key === "$sort") {
+            if (_.isNil(child[key]) || child[key] === "") delete child[key];
+            return _.keys(child).length === 0;
+          }
+          else if (key === "$project") {
+            if (_.isNil(child[key]) || _.keys(child[key]).length === 0) delete child[key];
+            return _.keys(child).length === 0;
+          }
+          else if (key === "$skip") {
+            if (_.isNil(child[key]) || (_.isNumber(child[key]) && child[key] < 0)) delete child[key];
+            return _.keys(child).length === 0;
+          }
+          else if (key === "$limit") {
+            if (_.isNil(child[key]) || (_.isNumber(child[key]) && child[key] < 1)) delete child[key];
+            return _.keys(child).length === 0;
+          }
+        }
+        return false;
+      });
+    }
+  };
+
+  checkChildren(query);
+  return query;
+};
+
+/**
+ * Shortcut function to simply take the raw results from an aggregate query that has a count and facet and put it into a simpiler object.
+ * @param results - the query results
+ * @return object
+ */
+dlib.parseAggregateResults = function (results) {
+  return {
+    count  : _.get(results, [0, "count", 0, "count"], 0),
+    records: _.get(results, [0, "records"], [])
+  }
+};
+
+/**
+ * Takes an aggregated query array and searches for a skip condition in the pipeline and changes it to the specified value.
+ * NOTE: This method mutates the array as well as returns it.
+ * @param aggregateArray - the query array to alter
+ * @param skip - the new value, starting at 0
+ * @return array
+ */
+dlib.setAggregateSkip = function (aggregateArray, skip) {
+
+  const checkPipeline = operator => {
+    if (_.isArray(operator)) {
+      for (let element of operator) {
+        checkPipeline(element);
+      }
+    }
+    else if (_.isObjectLike(operator)) {
+      for (let key of _.keys(operator)) {
+        if (key === "$skip") {
+          operator[key] = skip;
+        }
+        else {
+          checkPipeline(operator[key]);
+        }
+      }
+    }
+  };
+  checkPipeline(aggregateArray);
+
+  return aggregateArray;
 };
 
 
@@ -513,7 +682,7 @@ const mergeClasses = function(...classes) {
  * @param token the moment.js token
  * @returns {string}
  */
-const getDateFormatTokenType = function (token) {
+dlib.getDateFormatTokenType = function (token) {
   switch (token) {
     case "M":
     case "Mo":
@@ -592,7 +761,7 @@ const getDateFormatTokenType = function (token) {
  * @param token the moment.js token
  * @returns {string}
  */
-const getDateFormatTokenUnit = function (token) {
+dlib.getDateFormatTokenUnit = function (token) {
   switch (token) {
     case "M":
     case "Mo":
@@ -671,7 +840,7 @@ const getDateFormatTokenUnit = function (token) {
  * @param format the moment.js format string
  * @returns {string}
  */
-const dateFormatToArray = function (format) {
+dlib.dateFormatToArray = function (format) {
   let tokens = ["M", "Mo", "MM", "MMM", "MMMM", "Q", "Qo", "D", "Do", "DD", "DDD", "DDDo", "DDDD", "d", "do", "dd", "ddd", "dddd", "e", "E", "w", "wo", "ww", "W", "Wo", "WW", "YY", "YYYY", "Y", "gg", "gggg", "GG", "GGGG", "A", "a", "H", "HH", "h", "hh", "k", "kk", "m", "mm", "s", "ss", "S", "SS", "SSS", "Z", "ZZ", "X", "x"];
   // because I am too lazy to sort the array manually.
   tokens.sort((a, b) => {
@@ -718,10 +887,10 @@ const dateFormatToArray = function (format) {
  * @param format the moment.js format string
  * @returns {string}
  */
-const dateFormatToMask = function (format) {
+dlib.dateFormatToMask = function (format) {
   if (!format) return undefined;
 
-  let mask = dateFormatToArray(format);
+  let mask = this.dateFormatToArray(format);
   mask     = mask.map(element => {
     if (_.has(element, "token")) {
       switch (element.token) {
@@ -799,13 +968,12 @@ const dateFormatToMask = function (format) {
   mask = _.flatten(mask);
   return mask;
 };
-
-const showTimeUnit         = {
+dlib.showTimeUnit         = {
   always : "always",
   nonZero: "nonZero",
   never  : "never"
 };
-const toTimeStringDefaults = {showDays: "nonZero", showHours: "nonZero", showMinutes: "nonZero", showSeconds: "nonZero", showMilliseconds: "never", padDays: false, padHours: false, padMinutes: false, padSeconds: false, formatNumber: true};
+dlib.toTimeStringDefaults = {showDays: "nonZero", showHours: "nonZero", showMinutes: "nonZero", showSeconds: "nonZero", showMilliseconds: "never", padDays: false, padHours: false, padMinutes: false, padSeconds: false, formatNumber: true};
 
 /**
  * Convert a number in milliseconds to a time formatted string in dd:hh:m:ss.ms
@@ -813,7 +981,7 @@ const toTimeStringDefaults = {showDays: "nonZero", showHours: "nonZero", showMin
  * @param options show or hide time units.
  * @returns {string}
  */
-const toTimeString = function (number, options = toTimeStringDefaults) {
+dlib.toTimeString = function (number, options = toTimeStringDefaults) {
   let result, d, h, m, s, x;
   if (_.isNil(number) || _.isNaN(number) || !_.isFinite(number)) return undefined;
   _.defaults(options, toTimeStringDefaults);
@@ -822,7 +990,7 @@ const toTimeString = function (number, options = toTimeStringDefaults) {
   if (isNegative) number = Math.abs(number);
 
   d = Math.floor(number / (1000 * 60 * 60 * 24));
-  if (options.showDays === showTimeUnit.always || (options.showDays.nonZero && d > 0)) {
+  if (options.showDays === this.showTimeUnit.always || (options.showDays.nonZero && d > 0)) {
     h = Math.floor((number / (1000 * 60 * 60)) % 24);
     m = Math.floor((number / (1000 * 60)) % 60);
     s = Math.floor((number / 1000) % 60);
@@ -830,13 +998,13 @@ const toTimeString = function (number, options = toTimeStringDefaults) {
 
     d      = options.formatNumber ? d.toLocaleString() : _.toString(d);
     result = options.padDays ? _.padStart(d, 2, "0") : d;
-    if (options.showHours !== showTimeUnit.never) {
+    if (options.showHours !== this.showTimeUnit.never) {
       result += ":" + _.padStart(h, 2, "0");
-      if (options.showMinutes !== showTimeUnit.never) {
+      if (options.showMinutes !== this.showTimeUnit.never) {
         result += ":" + _.padStart(m, 2, "0");
-        if (options.showSeconds !== showTimeUnit.never) {
+        if (options.showSeconds !== this.showTimeUnit.never) {
           result += ":" + _.padStart(s, 2, "0");
-          if (options.showMilliseconds !== showTimeUnit.never) {
+          if (options.showMilliseconds !== this.showTimeUnit.never) {
             result += "." + _.padStart(x, 3, "0");
           }
         }
@@ -844,17 +1012,17 @@ const toTimeString = function (number, options = toTimeStringDefaults) {
     }
   } else {
     h = Math.floor(number / (1000 * 60 * 60));
-    if (options.showHours === showTimeUnit.always || (options.showHours === showTimeUnit.nonZero && h > 0)) {
+    if (options.showHours === this.showTimeUnit.always || (options.showHours === this.showTimeUnit.nonZero && h > 0)) {
       h      = options.formatNumber ? h.toLocaleString() : _.toString(h);
       result = options.padhours ? _.padStart(h, 2, "0") : h;
       m      = Math.floor((number / (1000 * 60)) % 60);
       s      = Math.floor((number / 1000) % 60);
       x      = Math.floor(number % 1000);
-      if (options.showMinutes !== showTimeUnit.never) {
+      if (options.showMinutes !== this.showTimeUnit.never) {
         result += ":" + _.padStart(m, 2, "0");
-        if (options.showSeconds !== showTimeUnit.never) {
+        if (options.showSeconds !== this.showTimeUnit.never) {
           result += ":" + _.padStart(s, 2, "0");
-          if (options.showMilliseconds !== showTimeUnit.never) {
+          if (options.showMilliseconds !== this.showTimeUnit.never) {
             result += "." + _.padStart(x, 3, "0");
           }
 
@@ -862,29 +1030,29 @@ const toTimeString = function (number, options = toTimeStringDefaults) {
       }
     } else {
       m = Math.floor(number / (1000 * 60));
-      if (options.showMinutes === showTimeUnit.always || (options.showMinutes === showTimeUnit.nonZero && m > 0)) {
+      if (options.showMinutes === this.showTimeUnit.always || (options.showMinutes === this.showTimeUnit.nonZero && m > 0)) {
         m      = options.formatNumber ? m.toLocaleString() : _.toString(m);
         result = options.padMinutes ? _.padStart(m, 2, "0") : m;
         s      = Math.floor((number / 1000) % 60);
         x      = Math.floor(number % 1000);
-        if (options.showSeconds !== showTimeUnit.never) {
+        if (options.showSeconds !== this.showTimeUnit.never) {
           result += ":" + _.padStart(s, 2, "0");
-          if (options.showMilliseconds !== showTimeUnit.never) {
+          if (options.showMilliseconds !== this.showTimeUnit.never) {
             result += "." + _.padStart(x, 3, "0");
           }
         }
       } else {
         s = Math.floor(number / 1000);
-        if (options.showSeconds === showTimeUnit.always || (options.showSeconds === showTimeUnit.nonZero && s > 0)) {
+        if (options.showSeconds === this.showTimeUnit.always || (options.showSeconds === this.showTimeUnit.nonZero && s > 0)) {
           s      = options.formatNumber ? s.toLocaleString() : _.toString(s);
           result = options.padSeconds ? _.padStart(s, 2, "0") : s;
           x      = Math.floor(number % 1000);
-          if (options.showMilliseconds !== showTimeUnit.never) {
+          if (options.showMilliseconds !== this.showTimeUnit.never) {
             result += "." + _.padStart(x, 3, "0");
           }
         } else {
           x = number;
-          if (options.showMilliseconds === showTimeUnit.always || (options.showMilliseconds === showTimeUnit.nonZero && x > 0)) {
+          if (options.showMilliseconds === this.showTimeUnit.always || (options.showMilliseconds === this.showTimeUnit.nonZero && x > 0)) {
             result = "0." + _.padStart(x, 3, "0");
           } else {
             result = "0";
@@ -902,7 +1070,7 @@ const toTimeString = function (number, options = toTimeStringDefaults) {
  * @param number A number in milliseconds
  * @returns {number}
  */
-const trimTime = function (number) {
+dlib.trimTime = function (number) {
   let d = new Date(number);
   return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0).getTime();
 };
@@ -912,7 +1080,7 @@ const trimTime = function (number) {
  * @returns {number}
  * @param object
  */
-const objectToDate = function (object) {
+dlib.objectToDate = function (object) {
   return new Date(object.year, object.month - 1, object.day, object.hour || object.hours || 0, object.minute || object.minutes || 0, object.second || object.seconds || 0);
 };
 
@@ -924,7 +1092,7 @@ const objectToDate = function (object) {
  * @param objectToCompareTo second object to check
  * @returns {object}
  */
-const differenceObj = function (objectToCompareFrom, objectToCompareTo) {
+dlib.differenceObj = function (objectToCompareFrom, objectToCompareTo) {
   function changes(object, base) {
     return _.transform(object, function (result, value, key) {
       if (!_.isEqual(value, base[key])) {
@@ -944,7 +1112,7 @@ const differenceObj = function (objectToCompareFrom, objectToCompareTo) {
  * @param other the second object to compare
  * @returns {boolean}
  */
-const areChildrenEqual = function (object, other) {
+dlib.areChildrenEqual = function (object, other) {
   return _.isEqualWith(object, other, (object, other, key) => {
     if (_.isFunction(object) && _.isFunction(other)) return true;
     if (_.isString(key) && key.startsWith("_")) return true;
@@ -962,7 +1130,7 @@ const areChildrenEqual = function (object, other) {
  * @param ascending if true, the starting value will be 0, if false, the starting value will be 1.
  * @returns {number}
  */
-const percent = function (percentage, maxValue = 1, minValue = 0, ascending = true) {
+dlib.percent = function (percentage, maxValue = 1, minValue = 0, ascending = true) {
   return ((maxValue - minValue) * Math.max(0, Math.min(1, Math.abs(Number(ascending) - percentage)))) + minValue;
 };
 
@@ -975,7 +1143,7 @@ const percent = function (percentage, maxValue = 1, minValue = 0, ascending = tr
  * @param ascending if true, the starting value will be 0, if false, the starting value will be 1.
  * @returns {number}
  */
-const percentf = function (numerator, denominator, maxValue = 1, minValue = 0, ascending = true) {
+dlib.percentf = function (numerator, denominator, maxValue = 1, minValue = 0, ascending = true) {
   return ((maxValue - minValue) * Math.max(0, Math.min(1, Math.abs(Number(!ascending) - (numerator / denominator))))) + minValue;
 };
 
@@ -984,7 +1152,7 @@ const percentf = function (numerator, denominator, maxValue = 1, minValue = 0, a
  * @param value the value to convert
  * @returns {string}
  */
-const toHex = function (value) {
+dlib.toHex = function (value) {
   let hex = value.toString(16);
   return hex.length === 1 ? "0" + hex : hex;
 };
@@ -995,7 +1163,7 @@ const toHex = function (value) {
  * @param max the higher number
  * @returns {number}
  */
-const random = function (min, max) {
+dlib.random = function (min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
@@ -1004,7 +1172,7 @@ const random = function (min, max) {
  * @param rads
  * @returns {number}
  */
-const toDegrees = function (rads) {
+dlib.toDegrees = function (rads) {
   return rads * (180 / Math.PI);
 };
 
@@ -1013,7 +1181,7 @@ const toDegrees = function (rads) {
  * @param degs
  * @returns {number}
  */
-const toRadians = function (degs) {
+dlib.toRadians = function (degs) {
   return degs * (Math.PI / 180);
 };
 
@@ -1025,7 +1193,7 @@ const toRadians = function (degs) {
  * @param y2
  * @returns {number}
  */
-const getDistanceBetweenCoords = function (x1, y1, x2, y2) {
+dlib.getDistanceBetweenCoords = function (x1, y1, x2, y2) {
   let dx = x2 - x1;
   let dy = y2 - y1;
   return Math.sqrt((dx * dx) + (dy * dy));
@@ -1037,7 +1205,7 @@ const getDistanceBetweenCoords = function (x1, y1, x2, y2) {
  * @param dy
  * @returns {number}
  */
-const getDistanceDelta = function (dx, dy) {
+dlib.getDistanceDelta = function (dx, dy) {
   return Math.sqrt((dx * dx) + (dy * dy));
 };
 
@@ -1050,12 +1218,12 @@ const getDistanceDelta = function (dx, dy) {
  * @param distanceFromX1Y1 distance from x1, y1
  * @returns {number}
  */
-const getPointOnLine = function (x1, y1, x2, y2, distanceFromX1Y1) {
-  let d = getDistanceBetweenCoords(x1, y1, x2, y2);
+dlib.getPointOnLine = function (x1, y1, x2, y2, distanceFromX1Y1) {
+  let d = this.getDistanceBetweenCoords(x1, y1, x2, y2);
   if (d === 0) return [x1, y1];
 
   let per = (distanceFromX1Y1 / d);
-  return getPointOnLinePercentage(x1, y1, x2, y2, per);
+  return this.getPointOnLinePercentage(x1, y1, x2, y2, per);
 };
 
 /**
@@ -1067,7 +1235,7 @@ const getPointOnLine = function (x1, y1, x2, y2, distanceFromX1Y1) {
  * @param percentageBetweenFromX1Y1 Percentage distance between 0 and 1 from x1,y1 to x2,y2
  * @returns {number}
  */
-const getPointOnLinePercentage = function (x1, y1, x2, y2, percentageBetweenFromX1Y1) {
+dlib.getPointOnLinePercentage = function (x1, y1, x2, y2, percentageBetweenFromX1Y1) {
   let deltaX = (x2 - x1);
   let deltaY = (y2 - y1);
   let x      = x1 + (deltaX * percentageBetweenFromX1Y1);
@@ -1082,7 +1250,7 @@ const getPointOnLinePercentage = function (x1, y1, x2, y2, percentageBetweenFrom
  * @param distanceFromPointA distance from a
  * @returns {number}
  */
-const getPointOnLine2D = function (a, b, distanceFromPointA) {
+dlib.getPointOnLine2D = function (a, b, distanceFromPointA) {
   let d   = b - a;
   let per = distanceFromPointA / d;
   return a + (d * per);
@@ -1095,7 +1263,7 @@ const getPointOnLine2D = function (a, b, distanceFromPointA) {
  * @param percentageFromPointA Percentage distance between 0 and 1 from a to b
  * @returns {number}
  */
-const getPointOnLine2DPercentage = function (a, b, percentageFromPointA) {
+dlib.getPointOnLine2DPercentage = function (a, b, percentageFromPointA) {
   let d = (b - a);
   return a + (d * percentageFromPointA);
 };
@@ -1114,8 +1282,8 @@ const getPointOnLine2DPercentage = function (a, b, percentageFromPointA) {
  * @param steps the total number of steps to take between x1,y1 and x2,y2
  * @returns {number}
  */
-const getBezierPoint = function (x1, y1, x2, y2, cx1, cy1, cx2, cy2, step, steps) {
-  return getBezierPointPercentage(x1, y1, x2, y2, cx1, cy1, cx2, cy2, step / steps);
+dlib.getBezierPoint = function (x1, y1, x2, y2, cx1, cy1, cx2, cy2, step, steps) {
+  return this.getBezierPointPercentage(x1, y1, x2, y2, cx1, cy1, cx2, cy2, step / steps);
 };
 
 /**
@@ -1131,9 +1299,9 @@ const getBezierPoint = function (x1, y1, x2, y2, cx1, cy1, cx2, cy2, step, steps
  * @param percentage value from 0 to 1 for distance from x1,y1 to x2,y2
  * @returns {number}
  */
-const getBezierPointPercentage = function (x1, y1, x2, y2, cx1, cy1, cx2, cy2, percentage) {
-  let x = getBezier2DPercentage(x1, x2, cx1, cx2, percentage);
-  let y = getBezier2DPercentage(y1, y2, cy1, cy2, percentage);
+dlib.getBezierPointPercentage = function (x1, y1, x2, y2, cx1, cy1, cx2, cy2, percentage) {
+  let x = this.getBezier2DPercentage(x1, x2, cx1, cx2, percentage);
+  let y = this.getBezier2DPercentage(y1, y2, cy1, cy2, percentage);
   return {x, y};
 };
 
@@ -1147,8 +1315,8 @@ const getBezierPointPercentage = function (x1, y1, x2, y2, cx1, cy1, cx2, cy2, p
  * @param steps the total number of steps to take between p1 and p2
  * @returns {number}
  */
-const getBezier2D = function (p1, p2, cp1, cp2, step, steps) {
-  return getBezier2DPercentage(p1, p2, cp1, cp2, step / steps);
+dlib.getBezier2D = function (p1, p2, cp1, cp2, step, steps) {
+  return this.getBezier2DPercentage(p1, p2, cp1, cp2, step / steps);
 };
 
 /**
@@ -1160,7 +1328,7 @@ const getBezier2D = function (p1, p2, cp1, cp2, step, steps) {
  * @param percentage value from 0 to 1 for distance from p1 to p2
  * @returns {number}
  */
-const getBezier2DPercentage = function (p1, p2, cp1, cp2, percentage) {
+dlib.getBezier2DPercentage = function (p1, p2, cp1, cp2, percentage) {
   let C = 3 * (cp1 - p1);
   let B = 3 * (cp2 - cp1) - C;
   let A = p2 - p1 - C - B;
@@ -1179,7 +1347,7 @@ const getBezier2DPercentage = function (p1, p2, cp1, cp2, percentage) {
  * @param color an rgb() string, rgba() string, or hex color string (# or 0x)
  * @returns {object}
  */
-const colorToRGBA = function (color) {
+dlib.colorToRGBA = function (color) {
   let newColor = {r: 0, g: 0, b: 0, a: 1};
 
   try {
@@ -1233,8 +1401,8 @@ const colorToRGBA = function (color) {
  * @param alpha optional - the alpha color between 0 and 255 - omit if r is color object
  * @returns {string}
  */
-const rgbaToHex = function (red, green, blue, alpha) {
-  let {r, g, b, a} = _.isObjectLike(red) && _.has(red, ["r"]) && _.has(red, ["g"]) && _.has(red, ["b"]) ? red : _.isString(red) ? colorToRGBA(red) : {r: red, g: green, b: blue, a: alpha};
+dlib.rgbaToHex = function (red, green, blue, alpha) {
+  let {r, g, b, a} = _.isObjectLike(red) && _.has(red, ["r"]) && _.has(red, ["g"]) && _.has(red, ["b"]) ? red : _.isString(red) ? this.colorToRGBA(red) : {r: red, g: green, b: blue, a: alpha};
   if (_.isNil(r) || _.isNil(g) || _.isNil(b)) return undefined;
 
   r = r.toString(16).padStart(2, "0");
@@ -1251,7 +1419,7 @@ const rgbaToHex = function (red, green, blue, alpha) {
  * @param color - the object containing r, g, b, and a properties.
  * @returns {string}
  */
-const rgbaToString = function (color) {
+dlib.rgbaToString = function (color) {
   if (!color) color = {};
   if (!color.r) color.r = 0;
   if (!color.g) color.g = 0;
@@ -1264,10 +1432,10 @@ const rgbaToString = function (color) {
  * @param hexColor = the hex color as in #000000 or #000
  * @param a - optional alpha channel, if omitted, an RGB string will be returned instead of RGBA
  */
-const hexToRGBA = function (hexColor, a) {
+dlib.hexToRGBA = function (hexColor, a) {
   if (!hexColor) return undefined;
   if (hexColor === "transparent") return 0;
-  let color = colorToRGBA(hexColor);
+  let color = this.colorToRGBA(hexColor);
   if (!_.isNil(a)) {
     return `rgba(${color.r}, ${color.g}, ${color.b}, ${a})`;
   } else {
@@ -1282,26 +1450,26 @@ const hexToRGBA = function (hexColor, a) {
  * @param to the color that the from will be blended towards
  * @returns {string}
  */
-const colorBlend = function (percentage, from, to) {
+dlib.colorBlend = function (percentage, from, to) {
   if (_.isNil(percentage) || _.isNil(from) || _.isNil(to)) return undefined;
   if (typeof (percentage) !== "number") return undefined;
   if (percentage === 0) return from;
 
   try {
-    let fromColor = _.isObjectLike(from) && _.has(from, ["r"]) && _.has(from, ["g"]) && _.has(from, ["b"]) ? from : colorToRGBA(from);
-    let toColor   = _.isObjectLike(to) && _.has(to, ["r"]) && _.has(to, ["g"]) && _.has(to, ["b"]) ? color : colorToRGBA(to);
+    let fromColor = _.isObjectLike(from) && _.has(from, ["r"]) && _.has(from, ["g"]) && _.has(from, ["b"]) ? from : this.colorToRGBA(from);
+    let toColor   = _.isObjectLike(to) && _.has(to, ["r"]) && _.has(to, ["g"]) && _.has(to, ["b"]) ? to : this.colorToRGBA(to);
     percentage    = Math.max(0, Math.min(1, percentage));
 
     let newColor = {r: 0, g: 0, b: 0, a: 1};
-    newColor.r   = Math.round(percent(percentage, fromColor.r, toColor.r));
-    newColor.g   = Math.round(percent(percentage, fromColor.g, toColor.g));
-    newColor.b   = Math.round(percent(percentage, fromColor.b, toColor.b));
-    newColor.a   = Math.round(percent(percentage, fromColor.a, toColor.a));
+    newColor.r   = Math.round(this.percent(percentage, fromColor.r, toColor.r));
+    newColor.g   = Math.round(this.percent(percentage, fromColor.g, toColor.g));
+    newColor.b   = Math.round(this.percent(percentage, fromColor.b, toColor.b));
+    newColor.a   = Math.round(this.percent(percentage, fromColor.a, toColor.a));
 
     if (_.isObjectLike(from)) return newColor;
     if (from.startsWith("rgba")) return "rgba(" + newColor.r + "," + newColor.g + "," + newColor.b + "," + newColor.a + ")";
     if (from.startsWith("rgb")) return "rgb(" + newColor.r + "," + newColor.g + "," + newColor.b + ")";
-    if (from.startsWith("#")) return rgbaToHex(newColor.r, newColor.g, newColor.b, from.length === 5 || from.length === 9 ? newColor.a : undefined);
+    if (from.startsWith("#")) return this.rgbaToHex(newColor.r, newColor.g, newColor.b, from.length === 5 || from.length === 9 ? newColor.a : undefined);
   } catch (err) {
     // color may have just been a litteral string... or something else. doesn't matter.
   }
@@ -1313,10 +1481,10 @@ const colorBlend = function (percentage, from, to) {
  * @param color string or object - can be a 3 or 6 character hex value ("#000" or "#000000), a string starting with rgb or rgba ("rgb(#, #, #, #)") or an object containing rgba properties ({r:#, g:#, b:#, a:#}) - (alpha values are optional and not changed)
  * @returns {number|undefined}
  */
-const getBrightness = function (color) {
+dlib.getBrightness = function (color) {
   if (_.isNil(color)) return undefined;
   try {
-    let {r, g, b} = _.isObjectLike(color) && _.has(color, ["r"]) && _.has(color, ["g"]) && _.has(color, ["b"]) ? color : colorToRGBA(color);
+    let {r, g, b} = _.isObjectLike(color) && _.has(color, ["r"]) && _.has(color, ["g"]) && _.has(color, ["b"]) ? color : this.colorToRGBA(color);
     if (_.isNil(r) && _.isNil(g) && _.isNil(b)) return undefined;
 
     return (r * 299 + g * 587 + b * 114) / 1000;
@@ -1331,8 +1499,8 @@ const getBrightness = function (color) {
  * @param brightnessOffset
  * @returns {boolean|undefined}
  */
-const isDark = function (color, brightnessOffset = 0) {
-  return getBrightness(color) < 123 + brightnessOffset;
+dlib.isDark = function (color, brightnessOffset = 0) {
+  return this.getBrightness(color) < 123 + brightnessOffset;
 };
 
 // ----------- Image and Dom processing ------------------------------------------------------------------------------------------------
@@ -1346,7 +1514,7 @@ const isDark = function (color, brightnessOffset = 0) {
  * @param keepAspectRatio if true, aspect ratio will be maintained based on whatever ratio is higher
  * @returns {string}
  */
-const resizeImage = function (document, imgSource, targetWidth, targetHeight, keepAspectRatio = true) {
+dlib.resizeImage = function (document, imgSource, targetWidth, targetHeight, keepAspectRatio = true) {
   return new Promise((resolve, reject, onCancel) => {
     let cancelled = false;
     onCancel && onCancel(() => cancelled = true);
@@ -1422,14 +1590,14 @@ const resizeImage = function (document, imgSource, targetWidth, targetHeight, ke
  * @param element
  * @returns {object}
  */
-const getBoundingClientRect = (element) => {
-  return new rect(element.getBoundingClientRect());
+dlib.getBoundingClientRect = (element) => {
+  return new this.rect(element.getBoundingClientRect());
 };
 
 /**
  * an as close as I can get copy of the rectangle object (usually returned by the getBoundingClientRect) that allowed changes
  */
-const rect = class rect {
+dlib.rect = class rect {
   constructor(top = 0, right = 0, bottom = 0, left = 0, x = 0, y = 0) {
     this.set(top, right, bottom, left, x, y);
   }
@@ -1546,14 +1714,14 @@ const rect = class rect {
  * Shortcut function to get the size of the browser viewport
  * @returns {object}
  */
-const getViewport = function () {
+dlib.getViewport = function () {
   let w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
   let h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
 
   return {width: w, height: h};
 };
 
-const focusNextElement = function () {
+dlib.focusNextElement = function () {
   let currentFocus = document.activeElement;
   let elements     = [...document.querySelectorAll("a[href]:not([tabindex='-1']), area[href]:not([tabindex='-1']), input:not([disabled]):not([tabindex='-1']), select:not([disabled]):not([tabindex='-1']), textarea:not([disabled]):not([tabindex='-1']), button:not([disabled]):not([tabindex='-1']), iframe:not([tabindex='-1']), [tabindex]:not([tabindex='-1']), [contentEditable=true]:not([tabindex='-1'])")];
   elements.sort((a, b) => parseInt(a.tabIndex || 0) - parseInt(b.tabIndex || 0));
@@ -1569,7 +1737,7 @@ const focusNextElement = function () {
  * @param size number in bytes
  * @returns {string}
  */
-const getFileSizeBaseUnit = function (size) {
+dlib.getFileSizeBaseUnit = function (size) {
   if (size < 1000) return "b";
   if (size < 1000000) return "kb";
   if (size < 1000000000) return "mb";
@@ -1585,7 +1753,7 @@ const getFileSizeBaseUnit = function (size) {
  * @param addUnit if true, the unit characters will be appended to the string.
  * @returns {string}
  */
-const getFileSizeString = function (size, unit = "b", decimals = 0, addUnit = true) {
+dlib.getFileSizeString = function (size, unit = "b", decimals = 0, addUnit = true) {
   unit = _.toUpper(unit);
   if (unit !== "B" && unit !== "KB" && unit !== "MB" && unit !== "GB" && unit !== "TB") unit = "KB";
   if (_.isNil(size)) size = 0;
@@ -1613,7 +1781,7 @@ const getFileSizeString = function (size, unit = "b", decimals = 0, addUnit = tr
  * @param sep the path separator.
  * @returns {array}
  */
-const pathSorter = function (sep = "/") {
+dlib.pathSorter = function (sep = "/") {
   return function (aValue, bValue) {
     let a = aValue.split(sep);
     let b = bValue.split(sep);
@@ -1630,7 +1798,7 @@ const pathSorter = function (sep = "/") {
   }
 };
 
-const sort = function (arr, locale, path = undefined, caseInsensitive = false, trim = false) {
+dlib.sort = function (arr, locale, path = undefined, caseInsensitive = false, trim = false) {
   let collator = new Intl.Collator(locale || "en-CA", {sensitivity: 'base'});
   arr.sort((valA, valB) => {
     if (path) valA = _.get(valA, [path]);
@@ -1638,9 +1806,9 @@ const sort = function (arr, locale, path = undefined, caseInsensitive = false, t
 
     valA = _.isNil(valA) ? "" : valA;
     valB = _.isNil(valB) ? "" : valB;
-    if (!_.isNil(toNumber(valA)) && _.isNil(toNumber(valB))) return 1;
-    if (_.isNil(toNumber(valA)) && !_.isNil(toNumber(valB))) return -1;
-    if (!_.isNil(toNumber(valA)) && !_.isNil(toNumber(valB))) return (toNumber(valA) - toNumber(valB));
+    if (!_.isNil(this.toNumber(valA)) && _.isNil(this.toNumber(valB))) return 1;
+    if (_.isNil(this.toNumber(valA)) && !_.isNil(this.toNumber(valB))) return -1;
+    if (!_.isNil(this.toNumber(valA)) && !_.isNil(this.toNumber(valB))) return (this.toNumber(valA) - this.toNumber(valB));
     if (caseInsensitive === true) {
       valA = _.upperCase(valA);
       valB = _.upperCase(valB);
@@ -1659,7 +1827,7 @@ const sort = function (arr, locale, path = undefined, caseInsensitive = false, t
  * @param path the path and filename to load.
  * @returns {string}
  */
-const loadFileAsync = function (path) {
+dlib.loadFileAsync = function (path) {
   return new Promise((resolve, reject) => {
     let xhr                = new XMLHttpRequest();
     xhr.onreadystatechange = function () {
@@ -1677,7 +1845,7 @@ const loadFileAsync = function (path) {
   });
 };
 
-const importFiles = function (files) {
+dlib.importFiles = function (files) {
   let imported = {};
   files.keys().forEach(key => {
     imported[key] = files(key).default;
@@ -1688,11 +1856,33 @@ const importFiles = function (files) {
 // ----------- Document Helpers --------------------------------------------------------------------------------------------------
 
 /**
+ * Get's a parameter from a request object that is either in the query property or the body property
+ * @param req - the request object
+ * @param prop - optional - if specified, it will return the value of the specific query/body property instead of the full object.
+ * @param defaultValue
+ * @returns {(number|string|object|boolean)}
+ */
+dlib.getReqProp = function (req, prop = undefined, defaultValue = undefined) {
+  if (!req) return undefined;
+
+  let values = undefined;
+
+  if ((req.method === "POST" || req.method === "PUT" && req.body)) values = req.body;
+  else if (req.method === "GET" && req.query) values = req.query;
+  else if (req.body && !req.query) values = req.body;
+  else if (req.query && !req.body) values = req.query;
+  else if (req.body && !_.isEmpty(req.body)) values = req.body;
+  else if (req.query && !_.isEmpty(req.query)) values = req.body;
+
+  return _.get(values, [prop], defaultValue);
+};
+
+/**
  * Copy a bit of text to the clipboard
  * @param document - reference to the document object.
  * @param str - the string to put into the clipboard.
  */
-const copyToClipboard = function (document, str) {
+dlib.copyToClipboard = function (document, str) {
   const el = document.createElement('textarea');
   el.value = str;
   el.setAttribute('readonly', '');
@@ -1704,79 +1894,4 @@ const copyToClipboard = function (document, str) {
   document.body.removeChild(el);
 };
 
-module.exports = {
-  UUID,
-  toNumber,
-  isSafe,
-  combinePropsToString,
-  stripTags,
-  rectToObject,
-  removeFunctions,
-  findLast,
-  findLastIndex,
-  objectToDotPaths,
-  objectToDotPathsAsync,
-  getArgWithProp,
-  splitEvent,
-  normalize,
-  userAgent,
-  concatSm,
-  truncate,
-  removeEmptyProperties,
-  addKeys,
-  randomizeArray,
-  formatCurrency,
-  escapeRegEx,
-  unformatCurrency,
-  isEmailValid,
-  setDocumentValue,
-  generatePassword,
-  getReqProp,
-  mergeClasses,
-  getDateFormatTokenType,
-  getDateFormatTokenUnit,
-  dateFormatToArray,
-  dateFormatToMask,
-  showTimeUnit,
-  toTimeStringDefaults,
-  toTimeString,
-  trimTime,
-  objectToDate,
-  differenceObj,
-  areChildrenEqual,
-  percent,
-  percentf,
-  toHex,
-  random,
-  toDegrees,
-  toRadians,
-  getDistanceBetweenCoords,
-  getDistanceDelta,
-  getPointOnLine,
-  getPointOnLinePercentage,
-  getPointOnLine2D,
-  getPointOnLine2DPercentage,
-  getBezierPoint,
-  getBezierPointPercentage,
-  getBezier2D,
-  getBezier2DPercentage,
-  colorToRGBA,
-  rgbaToHex,
-  rgbaToString,
-  hexToRGBA,
-  colorBlend,
-  getBrightness,
-  isDark,
-  resizeImage,
-  getBoundingClientRect,
-  rect,
-  getViewport,
-  focusNextElement,
-  getFileSizeBaseUnit,
-  getFileSizeString,
-  pathSorter,
-  sort,
-  loadFileAsync,
-  importFiles,
-  copyToClipboard
-}
+module.exports = dlib;
