@@ -1,3 +1,5 @@
+const fs      = require('fs');
+const path    = require('path');
 const _       = require("lodash");
 const Promise = require("bluebird");
 Promise.config({warnings: {wForgottenReturn: false}, cancellation: true});
@@ -674,6 +676,28 @@ dlib.setAggregateSkip = function (aggregateArray, skip) {
   return aggregateArray;
 };
 
+/**
+ * Removes a React Synthetic event from an array and returns an object of the remaining arguments and the event.
+ * @param arr the array to check.
+ * @returns {{arguments: Array, event: undefined}}
+ */
+dlib.splitEvent = function (arr) {
+  let response = {
+    arguments: _.clone(arr),
+    event    : undefined
+  };
+
+  if (_.isArray(response.arguments)) {
+    for (let i = 0; i < response.arguments.length; i++) {
+      if (_.isObjectLike(response.arguments[i]) && _.get(response.arguments[i], "constructor.name") === 'SyntheticEvent') {
+        response.event = response.arguments[i];
+        response.arguments.splice(i, 1);
+        return response;
+      }
+    }
+  }
+  return response;
+};
 
 // --------- Date and Time Functions ------------------------------------------------------------------------
 
@@ -1775,6 +1799,26 @@ dlib.getFileSizeString = function (size, unit = "b", decimals = 0, addUnit = tru
   newSize     = newSize === 0 ? "<" + (1 / precision) : Number(newSize).toLocaleString();
   return newSize + (addUnit ? " " + unit : "");
 };
+
+/**
+ * Generate an array of all the directories in a specified directory
+ * @param dir the target directory
+ * @returns {array}
+ */
+dlib.getAllDirectories = function (dir) {
+  let returnDirs = [dir];
+  if (fs.existsSync(dir)) {
+    let files       = fs.readdirSync(dir);
+    let directories = files.filter(obj => fs.statSync(dir + path.sep + obj).isDirectory());
+    for (let directory of directories) {
+      let directoryPath  = dir + path.sep + directory;
+      let subDirectories = this.getAllDirectories(directoryPath);
+      returnDirs         = returnDirs.concat(subDirectories);
+    }
+  }
+  return _.compact(returnDirs);
+};
+
 
 /**
  * Comparator for a sort function to compare and sort paths.
