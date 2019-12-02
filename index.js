@@ -1910,9 +1910,19 @@ dlib.loadFileAsync = function (path) {
   });
 };
 
-dlib.importFiles = function (cache, requireContext, path, subDirs, mask) {
-  const importAll = r => r.keys().forEach(key => cache[key] = r(key).default);
-  importAll(requireContext(path, subDirs, mask));
+/**
+ * To use:
+ * const cache = {}; // define object to receive imports
+ * dlib.importFiles(cache, require.context(PathToFiles, SearchSubDirs, RegExpFileMask);
+ * ie:
+ * let teamPhotos = {};
+ * dlib.importFiles(teamPhotos, require.context('assets/aboutus/teamPhotos', false, /\.jpg$/));
+ *
+ * @param cache
+ * @param files
+ */
+dlib.importFiles = function (cache, files) {
+  files.keys().forEach(key => cache[key] = files(key).default);
 };
 
 // ----------- Document Helpers --------------------------------------------------------------------------------------------------
