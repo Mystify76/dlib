@@ -1,13 +1,31 @@
-const fs      = require('fs');
-const path    = require('path');
-const _       = require("lodash");
-const Promise = require("bluebird");
+const fs          = require('fs');
+const path        = require('path');
+const _           = require("lodash");
+const Promise     = require("bluebird");
+const queryString = require("query-string");
 Promise.config({warnings: {wForgottenReturn: false}, cancellation: true});
 
 let lut = [];
 for (let i = 0; i < 256; i++) { lut[i] = (i < 16 ? '0' : '') + (i).toString(16); }
 
 const dlib = {};
+
+/**
+ * A function that can be set when the app starts up to allow this module to get certain app variables.
+ * All the arguments are functions that will return whatever it is they are trying to get.
+ * @param getWindow
+ * @param getDocument
+ * @param getReact
+ * @param getHistory
+ */
+dlib.initializer = function (getWindow, getDocument, getReact, getHistory) {
+
+  this.getWindow   = getWindow;
+  this.getDocument = getDocument;
+  this.getReact    = getReact;
+  this.getHistory  = getHistory;
+
+};
 
 /**
  * Generate a UUID.
@@ -65,11 +83,13 @@ dlib.combinePropsToString = function (obj, props = [], delimiter = " ", trim = t
 
 /**
  * Attempts to remove all html tags from a string.
+ * this function requires the document be set in the initializer
  * @param html The value to check
  * @returns {string}
  */
 dlib.stripTags = function (html) {
-  let div       = document.createElement("div");
+  if (!this.getDocument()) throw new Error("No document defined");
+  let div       = this.getDocument().createElement("div");
   div.innerHTML = html;
   return div.textContent || div.innerText || "";
 };
@@ -233,6 +253,7 @@ dlib.normalize = function (str, removeSpaces = false) {
 
 /**
  * Get the browser user agent information
+ * This function requires the window object we set in the initializer
  * @returns {object}
  */
 dlib.userAgent = function () {
@@ -252,14 +273,14 @@ dlib.userAgent = function () {
       return this.OS.WINDOWS;
     }
   };
-  this.isIOS      = /iPad|iPhone|iPod/.test(this.ua) && !window.MSStream;
+  this.isIOS      = /iPad|iPhone|iPod/.test(this.ua) && !this.getWindow().MSStream;
   this.isWin      = (this.os === "win");
   this.isMac      = (this.os === "mac") || this.isIOS;
   this.isLinux    = (this.os === "linux");
   this.isIE       = typeof navigator === "object" ? ((navigator.appName === "Microsoft Internet Explorer" || navigator.appName.indexOf("MSAppHost") >= 0) ? parseFloat((this.ua.match(/(?:MSIE |Trident\/[0-9]+[.0-9]+;.*rv:)([0-9]+[.0-9]+)/) || [])[1]) : parseFloat((this.ua.match(/(?:Trident\/[0-9]+[.0-9]+;.*rv:)([0-9]+[.0-9]+)/) || [])[1])) : false;
   this.isOldIE    = this.isIE && this.isIE < 9;
   this.isGecko    = this.isMozilla = this.ua.match(/ Gecko\/\d+/);
-  this.isOpera    = window.opera && Object.prototype.toString.call(window.opera) === "[object Opera]";
+  this.isOpera    = this.getWindow().opera && Object.prototype.toString.call(this.getWindow().opera) === "[object Opera]";
   this.isWebKit   = parseFloat(this.ua.split("WebKit/")[1]) || undefined;
   this.isChrome   = parseFloat(this.ua.split(" Chrome/")[1]) || undefined;
   this.isEdge     = parseFloat(this.ua.split(" Edge/")[1]) || undefined;
@@ -331,11 +352,13 @@ const removeNilPropertiesOmitter = function (options, value, key) {
 
 /**
  * Loops through all children of a component and makes sure they all have unique keys
- * @param react - a reference to the React library since we are not including it in this library.
+ * This function requires that getReact be set by the initializer
  * @param component
  * @return component
  */
-dlib.addKeys = function (react, component) {
+dlib.addKeys = function (component) {
+  let react = this.getReact();
+  if (!react) throw new Error("No React defined");
   if (!react || !component) return component;
   const isValidElement = react.isValidElement;
   const cloneElement   = react.cloneElement;
@@ -547,8 +570,7 @@ dlib.convertToObject = function (obj, removeDoubleUnderscoreProperties = true) {
     if (_.isObjectLike(obj)) {
       if (_.isArray(obj)) {
         _.transform(obj, transformCB, obj);
-      }
-      else if (obj instanceof Object && (obj instanceof Date === false && obj instanceof RegExp === false && obj instanceof Array === false && obj instanceof Function === false)) {
+      } else if (obj instanceof Object && (obj instanceof Date === false && obj instanceof RegExp === false && obj instanceof Array === false && obj instanceof Function === false)) {
         if (obj.toObject && typeof obj.toObject === "function") {
           obj = obj.toObject();
           obj = _.omitBy(obj, (obj, key) => key.startsWith("__") || _.isFunction(obj));
@@ -599,27 +621,22 @@ dlib.cleanUpAggregateQuery = function (query) {
         }
       }
       return false;
-    }
-    else if (_.isObjectLike(child) && !_.isDate(child) && !_.isRegExp(child)) {
+    } else if (_.isObjectLike(child) && !_.isDate(child) && !_.isRegExp(child)) {
       let keys = _.keys(child);
       keys.forEach(key => {
         if (checkChildren(child[key])) {
           delete child[key]
-        }
-        else {
+        } else {
           if (key === "$sort") {
             if (_.isNil(child[key]) || child[key] === "") delete child[key];
             return _.keys(child).length === 0;
-          }
-          else if (key === "$project") {
+          } else if (key === "$project") {
             if (_.isNil(child[key]) || _.keys(child[key]).length === 0) delete child[key];
             return _.keys(child).length === 0;
-          }
-          else if (key === "$skip") {
+          } else if (key === "$skip") {
             if (_.isNil(child[key]) || (_.isNumber(child[key]) && child[key] < 0)) delete child[key];
             return _.keys(child).length === 0;
-          }
-          else if (key === "$limit") {
+          } else if (key === "$limit") {
             if (_.isNil(child[key]) || (_.isNumber(child[key]) && child[key] < 1)) delete child[key];
             return _.keys(child).length === 0;
           }
@@ -659,13 +676,11 @@ dlib.setAggregateSkip = function (aggregateArray, skip) {
       for (let element of operator) {
         checkPipeline(element);
       }
-    }
-    else if (_.isObjectLike(operator)) {
+    } else if (_.isObjectLike(operator)) {
       for (let key of _.keys(operator)) {
         if (key === "$skip") {
           operator[key] = skip;
-        }
-        else {
+        } else {
           checkPipeline(operator[key]);
         }
       }
@@ -1005,7 +1020,7 @@ dlib.toTimeStringDefaults = {showDays: "nonZero", showHours: "nonZero", showMinu
  * @param options show or hide time units.
  * @returns {string}
  */
-dlib.toTimeString = function (number, options ={}) {
+dlib.toTimeString = function (number, options = {}) {
   let result, d, h, m, s, x;
   if (_.isNil(number) || _.isNaN(number) || !_.isFinite(number)) return undefined;
   _.defaults(options, this.toTimeStringDefaults);
@@ -1531,18 +1546,18 @@ dlib.isDark = function (color, brightnessOffset = 0) {
 
 /**
  * Asynchronously resizes an image to a specific size using an html canvas
- * @param document
+ * This function requires that the intializer be set for the document object
  * @param imgSource can be raw base64 data:image data OR a url!
  * @param targetWidth in pixels
  * @param targetHeight in pixels
  * @param keepAspectRatio if true, aspect ratio will be maintained based on whatever ratio is higher
  * @returns {string}
  */
-dlib.resizeImage = function (document, imgSource, targetWidth, targetHeight, keepAspectRatio = true) {
+dlib.resizeImage = function (imgSource, targetWidth, targetHeight, keepAspectRatio = true) {
   return new Promise((resolve, reject, onCancel) => {
     let cancelled = false;
     onCancel && onCancel(() => cancelled = true);
-    if (!document) return reject("document not defined");
+    if (!this.getDocument()) return reject("document not defined");
     let image     = new Image();
     image.onerror = () => reject();
     image.onload  = (e) => {
@@ -1561,7 +1576,7 @@ dlib.resizeImage = function (document, imgSource, targetWidth, targetHeight, kee
           newHeight = targetHeight;
         }
       }
-      let canvas       = [document.createElement('canvas'), document.createElement('canvas')];
+      let canvas       = [this.getDocument().createElement('canvas'), this.getDocument().createElement('canvas')];
       let ctx          = [canvas[0].getContext('2d'), canvas[1].getContext('2d')];
       canvas[0].width  = width;
       canvas[0].height = height;
@@ -1736,18 +1751,25 @@ dlib.rect = class rect {
 
 /**
  * Shortcut function to get the size of the browser viewport
+ * this function requires the document and window object be initialized
  * @returns {object}
  */
 dlib.getViewport = function () {
-  let w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
-  let h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+  if (!this.getDocument()) throw new Error("No document defined");
+  let w = Math.max(this.getDocument().documentElement.clientWidth, this.getWindow().innerWidth || 0);
+  let h = Math.max(this.getDocument().documentElement.clientHeight, this.getWindow().innerHeight || 0);
 
   return {width: w, height: h};
 };
 
+/**
+ * Tries to set focus on the next element in the tab order
+ * This function requires the intializer be called to set the document object.
+ */
 dlib.focusNextElement = function () {
-  let currentFocus = document.activeElement;
-  let elements     = [...document.querySelectorAll("a[href]:not([tabindex='-1']), area[href]:not([tabindex='-1']), input:not([disabled]):not([tabindex='-1']), select:not([disabled]):not([tabindex='-1']), textarea:not([disabled]):not([tabindex='-1']), button:not([disabled]):not([tabindex='-1']), iframe:not([tabindex='-1']), [tabindex]:not([tabindex='-1']), [contentEditable=true]:not([tabindex='-1'])")];
+  if (!this.getDocument()) throw new Error("No document defined");
+  let currentFocus = this.getDocument().activeElement;
+  let elements     = [...this.getDocument().querySelectorAll("a[href]:not([tabindex='-1']), area[href]:not([tabindex='-1']), input:not([disabled]):not([tabindex='-1']), select:not([disabled]):not([tabindex='-1']), textarea:not([disabled]):not([tabindex='-1']), button:not([disabled]):not([tabindex='-1']), iframe:not([tabindex='-1']), [tabindex]:not([tabindex='-1']), [contentEditable=true]:not([tabindex='-1'])")];
   elements.sort((a, b) => parseInt(a.tabIndex || 0) - parseInt(b.tabIndex || 0));
   let currentIndex = elements.findIndex(obj => obj === currentFocus);
   let nextIndex    = currentIndex < elements.length - 1 ? currentIndex + 1 : 0;
@@ -1818,7 +1840,6 @@ dlib.getAllDirectories = function (dir) {
   }
   return _.compact(returnDirs);
 };
-
 
 /**
  * Comparator for a sort function to compare and sort paths.
@@ -1923,19 +1944,66 @@ dlib.getReqProp = function (req, prop = undefined, defaultValue = undefined) {
 
 /**
  * Copy a bit of text to the clipboard
- * @param document - reference to the document object.
+ * This function requires the document be set in the initializer
  * @param str - the string to put into the clipboard.
  */
-dlib.copyToClipboard = function (document, str) {
-  const el = document.createElement('textarea');
+dlib.copyToClipboard = function (str) {
+  const el = this.getDocument().createElement('textarea');
   el.value = str;
   el.setAttribute('readonly', '');
   el.style.position = 'absolute';
   el.style.left     = '-9999px';
-  document.body.appendChild(el);
+  this.getDocument().body.appendChild(el);
   el.select();
-  document.execCommand('copy');
-  document.body.removeChild(el);
+  this.getDocument().execCommand('copy');
+  this.getDocument().body.removeChild(el);
+};
+
+/**
+ * Default options for the openURL function
+ * @type {{button: number, specs: undefined, search: undefined, ctrl: boolean, userOpener: boolean, action: string, state: undefined, params: {}, useQueryString: boolean, key: undefined, target: undefined}}
+ */
+dlib.openURLOptions = {
+  search        : undefined,
+  action        : "PUSH",
+  params        : {},
+  key           : undefined,
+  state         : undefined,
+  ctrl          : false,
+  button        : 0,
+  useQueryString: true,
+  userOpener    : false,
+  target        : undefined,
+  specs         : undefined //https://www.w3schools.com/jsref/met_win_open.asp
+};
+
+/**
+ * Open a url either using the history object or the window object. Both need to be set by the initializer for this to work.
+  */
+dlib.openURL = function (pathname, options = {}) {
+  if (!this.getWindow()) throw new Error("No window defined");
+  if (!this.getHistory()) throw new Error("No history defined");
+  _.defaults(options, this.openURLOptions);
+
+  let queryObject = queryString.stringify(_.merge({}, options.useQueryString && this.getWindow().query, options.params));
+  let windowObj   = options.userOpener ? this.getWindow().opener : this.getWindow();
+  options.target  = options.target ? options.target : (options.ctrlKey || options.button === 1) ? "_blank" : undefined;
+
+  if (options.target) {
+    return windowObj.open(pathname + "?" + queryObject, options.target, options.specs)
+  } else {
+    let location = {
+      pathname: pathname,
+      search  : queryObject,
+      state   : options.state,
+      key     : this.UUID()
+    };
+    if (options.action === "replace") {
+      this.getHistory().replace(location);
+    } else {
+      this.getHistory().push(location);
+    }
+  }
 };
 
 module.exports = dlib;
