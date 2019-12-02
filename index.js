@@ -1920,9 +1920,16 @@ dlib.loadFileAsync = function (path) {
  *
  * @param cache
  * @param files
+ * @param trimTopLevelFolder
+ * @param trimExtension
  */
-dlib.importFiles = function (cache, files) {
-  files.keys().forEach(key => cache[key] = files(key).default);
+dlib.importFiles = function (cache, files, trimTopLevelFolder = true, trimExtension = true) {
+  files.keys().forEach(key => {
+    let cacheKey = key;
+    if(trimTopLevelFolder) cacheKey = cacheKey.replace(/\.[\\\/]/,'');
+    if(trimExtension) cacheKey = cacheKey.replace(/\..*$/,'');
+    cache[cacheKey] = files(key).default;
+  });
 };
 
 // ----------- Document Helpers --------------------------------------------------------------------------------------------------
