@@ -1910,12 +1910,9 @@ dlib.loadFileAsync = function (path) {
   });
 };
 
-dlib.importFiles = function (files) {
-  let imported = {};
-  files.keys().forEach(key => {
-    imported[key] = files(key).default;
-  });
-  return imported;
+dlib.importFiles = function (cache, requireContext, path, subDirs, mask) {
+  const importAll = r => r.keys().forEach(key => cache[key] = r(key).default);
+  importAll(requireContext(path, subDirs, mask));
 };
 
 // ----------- Document Helpers --------------------------------------------------------------------------------------------------
@@ -1979,7 +1976,7 @@ dlib.openURLOptions = {
 
 /**
  * Open a url either using the history object or the window object. Both need to be set by the initializer for this to work.
-  */
+ */
 dlib.openURL = function (pathname, options = {}) {
   if (!this.getWindow()) throw new Error("No window defined");
   if (!this.getHistory()) throw new Error("No history defined");
