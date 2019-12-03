@@ -1105,13 +1105,23 @@ dlib.toTimeString = function (number, options = {}) {
 };
 
 /**
- * Set a number in milliseconds midnight for the specified date. (ie: Math.floor for date and time)
+ * Get the number of milliseconds for 00:00:00.000 (start of day) for the specified date. (ie: Math.floor for date and time)
  * @param number A number in milliseconds
  * @returns {number}
  */
-dlib.trimTime = function (number) {
+dlib.startOfDay = function (number) {
   let d = new Date(number);
-  return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0).getTime();
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0).getTime();
+};
+
+/**
+ * Get the number of milliseconds for 23:59:59.999 (end of day) for the specified date. (ie: Math.floor for date and time)
+ * @param number A number in milliseconds
+ * @returns {number}
+ */
+dlib.endOfDay = function (number) {
+  let d = new Date(number);
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999).getTime();
 };
 
 /**
