@@ -3,6 +3,7 @@ const path        = require('path');
 const _           = require("lodash");
 const Promise     = require("bluebird");
 const queryString = require("query-string");
+const moment = require("moment");
 Promise.config({warnings: {wForgottenReturn: false}, cancellation: true});
 
 let lut = [];
@@ -1110,9 +1111,7 @@ dlib.toTimeString = function (number, options = {}) {
  * @returns {number}
  */
 dlib.startOfDay = function (number) {
-  // why am I not using the date object? Because the client time zone and the server time zone could be different and there is no way to know that of the client
-  let time = number % (1000 * 60 * 60 * 24);
-  return number - time;
+  return moment(number).hours(0).minutes(0).seconds(0).milliseconds(0).valueOf();
 };
 
 /**
@@ -1121,9 +1120,7 @@ dlib.startOfDay = function (number) {
  * @returns {number}
  */
 dlib.endOfDay = function (number) {
-  // why am I not using the date object? Because the client time zone and the server time zone could be different and there is no way to know that of the client
-  let time = number % (1000 * 60 * 60 * 24);
-  return (number - time) + (23 * 60 * 60 * 1000) + (59 * 60 * 1000) + (59 * 1000) + 999;
+  return moment(number).hours(23).minutes(59).seconds(59).milliseconds(999).valueOf();
 };
 
 /**
