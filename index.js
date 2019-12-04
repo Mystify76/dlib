@@ -1110,8 +1110,9 @@ dlib.toTimeString = function (number, options = {}) {
  * @returns {number}
  */
 dlib.startOfDay = function (number) {
-  let d = new Date(number);
-  return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0).getTime();
+  // why am I not using the date object? Because the client time zone and the server time zone could be different and there is no way to know that of the client
+  let time = number % (1000 * 60 * 60 * 24);
+  return number - time;
 };
 
 /**
@@ -1120,8 +1121,9 @@ dlib.startOfDay = function (number) {
  * @returns {number}
  */
 dlib.endOfDay = function (number) {
-  let d = new Date(number);
-  return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999).getTime();
+  // why am I not using the date object? Because the client time zone and the server time zone could be different and there is no way to know that of the client
+  let time = number % (1000 * 60 * 60 * 24);
+  return (number - time) + (23 * 60 * 60 * 1000) + (59 * 60 * 1000) + (59 * 1000) + 999;
 };
 
 /**
