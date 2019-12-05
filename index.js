@@ -3,7 +3,6 @@ const path        = require('path');
 const _           = require("lodash");
 const Promise     = require("bluebird");
 const queryString = require("query-string");
-const moment = require("moment");
 Promise.config({warnings: {wForgottenReturn: false}, cancellation: true});
 
 let lut = [];
@@ -1111,7 +1110,7 @@ dlib.toTimeString = function (number, options = {}) {
  * @returns {number}
  */
 dlib.startOfDay = function (number) {
-  return moment(number).hours(0).minutes(0).seconds(0).milliseconds(0).valueOf();
+  return number - (number % (1000 * 60 * 60 * 24));
 };
 
 /**
@@ -1120,7 +1119,7 @@ dlib.startOfDay = function (number) {
  * @returns {number}
  */
 dlib.endOfDay = function (number) {
-  return moment(number).hours(23).minutes(59).seconds(59).milliseconds(999).valueOf();
+  return number - (number % (1000 * 60 * 60 * 24)) + (1000 * 60 * 60 * 24) - 1;
 };
 
 /**
