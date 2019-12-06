@@ -2,7 +2,8 @@ const dlib = require("./index");
 
 console.log("UUID:", dlib.UUID());
 
-console.log("date:", 1575172800000, new Date(1575172800000));
-console.log("start:", dlib.startOfDay(1575172800000), new Date(dlib.startOfDay(1575172800000)));
-console.log("start:", dlib.startOfDay(1575158400000), new Date(dlib.startOfDay(1575158400000)));
-console.log("end:", dlib.endOfDay(1575172800000), new Date(dlib.endOfDay(1575172800000)));
+let d = new Date("2019 12 01 22:00:00").getTime()
+
+console.log("date:", d, new Date(d  - (new Date().getTimezoneOffset() * 1000 * 60)));
+console.log("start:", dlib.startOfDay(d), new Date(dlib.startOfDay(d  - (new Date().getTimezoneOffset() * 1000 * 60))));
+console.log("end:", dlib.endOfDay(d), new Date(dlib.endOfDay(d  - (new Date().getTimezoneOffset() * 1000 * 60))));

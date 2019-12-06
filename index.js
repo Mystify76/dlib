@@ -3,6 +3,7 @@ const path        = require('path');
 const _           = require("lodash");
 const Promise     = require("bluebird");
 const queryString = require("query-string");
+const moment = require("moment");
 Promise.config({warnings: {wForgottenReturn: false}, cancellation: true});
 
 let lut = [];
@@ -1105,21 +1106,25 @@ dlib.toTimeString = function (number, options = {}) {
 };
 
 /**
- * Get the number of milliseconds for 00:00:00.000 (start of day) for the specified date. (ie: Math.floor for date and time)
+ * takes a datetime in milliseconds and returns the start of day in milliseconds
  * @param number A number in milliseconds
+ * @param utc - the milliseconds is in utc time
  * @returns {number}
  */
-dlib.startOfDay = function (number) {
-  return number - (number % (1000 * 60 * 60 * 24));
+dlib.startOfDay = function (number, utc = false) {
+  if(utc)  return moment().utc(number).startOf("day").valueOf();
+  return moment(number).startOf("day").valueOf();
 };
 
 /**
- * Get the number of milliseconds for 23:59:59.999 (end of day) for the specified date. (ie: Math.floor for date and time)
+ * takes a datetime in milliseconds and returns the end of day in milliseconds
  * @param number A number in milliseconds
+ * @param utc - the milliseconds is in utc time
  * @returns {number}
  */
-dlib.endOfDay = function (number) {
-  return number - (number % (1000 * 60 * 60 * 24)) + (1000 * 60 * 60 * 24) - 1;
+dlib.endOfDay = function (number, utc = false) {
+  if(utc)  return moment().utc(number).endOf("day").valueOf();
+  return moment(number).endOf("day").valueOf();
 };
 
 /**
