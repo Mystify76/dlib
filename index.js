@@ -14,6 +14,8 @@ for (let i = 0; i < 256; i++) { lut[i] = (i < 16 ? '0' : '') + (i).toString(16);
 
 const dlib = {};
 
+dlib.iso_3166_2 = iso_3166_2;
+
 /**
  * A function that can be set when the app starts up to allow this module to get certain app variables.
  * All the arguments are functions that will return whatever it is they are trying to get.
