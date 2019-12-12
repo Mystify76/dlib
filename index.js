@@ -2050,7 +2050,6 @@ dlib.numberToIPv4 = function (ipNum) {
 
 dlib.getLocationProviders = {
   freeGeoIp      : "freegeoip",
-  ipStack        : "ipstack",
   extremeIpLookup: "extremeiplookup",
   ipGeolocation  : "ipgeolocation",
   KeyCDN         : "keycdn"
@@ -2061,11 +2060,8 @@ dlib.getLocationFromIp = function (ip, provider = "freegeoip", extra = false, ra
 
     let url = "";
     switch (provider) {
-      case "ipstack":
-        url = `http://api.ipstack.com/${ip}?access_key=b1415c6d9043431c136c205343cfca70`;
-        break;
       case "extremeiplookup":
-        url = `extreme-ip-lookup.com/json/${ip}`;
+        url = `https://extreme-ip-lookup.com/json/${ip}`;
         break;
       case "ipgeolocation":
         url = `https://api.ipgeolocation.io/ipgeo?apiKey=7d9e6199c7c14ce9bc053f54c58f8955&ip=${ip}`;
@@ -2086,21 +2082,6 @@ dlib.getLocationFromIp = function (ip, provider = "freegeoip", extra = false, ra
         let location = response.data;
         let retval = {};
         switch (provider) {
-          case "ipstack":
-            retval = {
-              ip: location.ip,
-              country: location.country_code,
-              subdivision: `${location.country_code}-${location.region_code}`,
-              city: location.city,
-              zip: location.zip
-            };
-            if(extra) {
-              retval.subdivision_name = location.region_name;
-              retval.country_name = location.country_name;
-              retval.continent = location.continent_code;
-              retval.continent_name = location.continent_name;
-            }
-            break;
           case "extremeiplookup":
             retval = {
               ip: ip,
