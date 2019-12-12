@@ -2042,7 +2042,7 @@ dlib.openURL = function (pathname, options = {}) {
  */
 dlib.numberToIPv4 = function (ipNum) {
   if (!ipNum) return "0.0.0.0";
-  return `${(ipNum / 16777216) % 256}.${(ipNum / 65536) % 256}.${(ipNum / 256) % 256}.${ipNum % 256}`;
+  return `${Math.floor((ipNum / 16777216)) % 256}.${Math.floor((ipNum / 65536)) % 256}.${Math.floor((ipNum / 256)) % 256}.${ipNum % 256}`;
 };
 
 module.exports = dlib;
