@@ -14,8 +14,6 @@ for (let i = 0; i < 256; i++) { lut[i] = (i < 16 ? '0' : '') + (i).toString(16);
 
 const dlib = {};
 
-dlib.iso_3166_2 = iso_3166_2;
-
 /**
  * A function that can be set when the app starts up to allow this module to get certain app variables.
  * All the arguments are functions that will return whatever it is they are trying to get.
@@ -2167,5 +2165,73 @@ dlib.getLocationFromIp = function (ip, provider = "freegeoip", extra = false, ra
     }).catch(reject);
   });
 };
+
+// ----------- iso_3166_2 Country and Subdivision Helpers --------------------------------------------------------------------------------------------------
+
+/**
+ * Make the constants file available to the outside.
+ * @type object
+ */
+dlib.iso_3166_2 = iso_3166_2;
+
+/**
+ * Does a check to make sure that a countryShort and subdivisionShort are in the iso_3166_2 file
+ * @returns boolean
+ * @param countryShort
+ * @param subdivisionShort
+ */
+dlib.checkLocation = function (countryShort, subdivisionShort) {
+  if (!_.has(iso_3166_2, countryShort)) return false;
+  if (!_.has(iso_3166_2[countryShort].divisions, subdivisionShort)) return false;
+};
+
+/**
+ * Does a check to make sure that a countryShort is in the iso_3166_2 file
+ * @returns boolean
+ * @param countryShort
+ */
+dlib.checkCountry = function (countryShort) {
+  return _.has(iso_3166_2, countryShort);
+};
+
+/**
+ * Does a check to make sure that a subdivisionShort is in the iso_3166_2 file
+ * @returns boolean
+ * @param subdivisionShort
+ */
+dlib.checkSubdivision = function (subdivisionShort) {
+  return _.has(iso_3166_2, [_.nth(_.split(subdivisionShort, "-"), 0), "divisions", subdivisionShort]);
+};
+
+/**
+ * returns the long name of hte country and subdivision based on the iso_3166_2 file
+ * @returns Object
+ * @param countryShort
+ * @param subdivisionShort
+ */
+dlib.getLongLocation = function (countryShort, subdivisionShort) {
+  let countryLong     = _.get(iso_3166_2, [countryShort, "name"]);
+  let subdivisionLong = _.get(iso_3166_2, [countryShort, "divisions", subdivisionShort]);
+  return {countryLong, subdivisionLong};
+};
+
+/**
+ * Get the long country name from the the iso_3166_2 file
+ * @returns string
+ * @param countryShort
+ */
+dlib.getCountryLong = function (countryShort) {
+  return _.get(iso_3166_2, [countryShort, "name"]);
+};
+
+/**
+ * Get the subdivision long name from the iso_3166_2 file
+ * @returns string
+ * @param subdivisionShort
+ */
+dlib.getSubdivisionLong = function (subdivisionShort) {
+  return _.get(iso_3166_2, [_.nth(_.split(subdivisionShort, "-"), 0), "divisions", subdivisionShort]);
+};
+
 
 module.exports = dlib;
