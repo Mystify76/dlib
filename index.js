@@ -4,6 +4,9 @@ const _           = require("lodash");
 const Promise     = require("bluebird");
 const queryString = require("query-string");
 const moment      = require("moment");
+const axios       = require("axios");
+const iso_3166_2  = require("./iso-3166-2.json");
+
 Promise.config({warnings: {wForgottenReturn: false}, cancellation: true});
 
 let lut = [];
@@ -2043,6 +2046,124 @@ dlib.openURL = function (pathname, options = {}) {
 dlib.numberToIPv4 = function (ipNum) {
   if (!ipNum) return "0.0.0.0";
   return `${Math.floor((ipNum / 16777216)) % 256}.${Math.floor((ipNum / 65536)) % 256}.${Math.floor((ipNum / 256)) % 256}.${ipNum % 256}`;
+};
+
+dlib.getLocationProviders = {
+  freeGeoIp      : "freegeoip",
+  ipStack        : "ipstack",
+  extremeIpLookup: "extremeiplookup",
+  ipGeolocation  : "ipgeolocation",
+  KeyCDN         : "keycdn"
+};
+
+dlib.getLocationFromIp = function (ip, provider = "freegeoip", extra = false, raw = false) {
+  return new Promise((resolve, reject) => {
+
+    let url = "";
+    switch (provider) {
+      case "ipstack":
+        url = `http://api.ipstack.com/${ip}?access_key=b1415c6d9043431c136c205343cfca70`;
+        break;
+      case "extremeiplookup":
+        url = `extreme-ip-lookup.com/json/${ip}`;
+        break;
+      case "ipgeolocation":
+        url = `https://api.ipgeolocation.io/ipgeo?apiKey=7d9e6199c7c14ce9bc053f54c58f8955&ip=${ip}`;
+        break;
+      case "keycdn":
+        url = `https://tools.keycdn.com/geo.json?host=${ip}`;
+        break;
+      case "freegeoip":
+        url = `https://freegeoip.app/json/${ip}`;
+        break;
+      default:
+        return reject("Unknown provider");
+    }
+
+    axios.get(url).then(response => {
+      if (response.status === 200) {
+        if (raw) return resolve(response);
+        let location = response.data;
+        let retval = {};
+        switch (provider) {
+          case "ipstack":
+            retval = {
+              ip: location.ip,
+              country: location.country_code,
+              subdivision: `${location.country_code}-${location.region_code}`,
+              city: location.city,
+              zip: location.zip
+            };
+            if(extra) {
+              retval.subdivision_name = location.region_name;
+              retval.country_name = location.country_name;
+              retval.continent = location.continent_code;
+              retval.continent_name = location.continent_name;
+            }
+            break;
+          case "extremeiplookup":
+            retval = {
+              ip: ip,
+              country: location.countryCode,
+              subdivision: iso_3166_2[location.countryCode] ? _.findKey(iso_3166_2[location.countryCode].divisions, name => this.normalize(name).includes(this.normalize(location.region))) : "",
+              city: location.city,
+              zip: ""
+            };
+            if(extra) {
+              retval.subdivision_name = location.region;
+              retval.country_name = location.country;
+              retval.continent_name = location.continent;
+            }
+            break;
+          case "ipgeolocation":
+            retval = {
+              ip: location.ip,
+              country: location.country_code2,
+              subdivision: iso_3166_2[location.country_code2] ? _.findKey(iso_3166_2[location.country_code2].divisions, name => this.normalize(name).includes(this.normalize(location.state_prov))) : "",
+              city: location.city,
+              zip: location.zipcode
+            };
+            if(extra) {
+              retval.subdivision_name = location.state_prov;
+              retval.country_name = location.country_name;
+              retval.continent = location.continent_code;
+              retval.continent_name = location.continent_name;
+            }
+            break;
+          case "keycdn":
+            location = location.data.geo;
+            retval = {
+              ip: location.ip,
+              country: location.country_code,
+              subdivision: `${location.country_code}-${location.region_code}`,
+              city: location.city,
+              zip: location.postal_code
+            };
+            if(extra) {
+              retval.subdivision_name = location.region_name;
+              retval.country_name = location.country_name;
+              retval.continent = location.continent_code;
+              retval.continent_name = location.continent_name;
+            }
+            break;
+          case "freegeoip":
+            retval = {
+              ip: location.ip,
+              country: location.country_code,
+              subdivision: `${location.country_code}-${location.region_code}`,
+              city: location.city,
+              zip: location.zip_code
+            };
+            if(extra) {
+              retval.subdivision_name = location.region_name;
+              retval.country_name = location.country_name;
+            }
+            break;
+        }
+        resolve(retval);
+      }
+    }).catch(reject);
+  });
 };
 
 module.exports = dlib;
