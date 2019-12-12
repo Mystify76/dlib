@@ -3,7 +3,7 @@ const path        = require('path');
 const _           = require("lodash");
 const Promise     = require("bluebird");
 const queryString = require("query-string");
-const moment = require("moment");
+const moment      = require("moment");
 Promise.config({warnings: {wForgottenReturn: false}, cancellation: true});
 
 let lut = [];
@@ -1112,7 +1112,7 @@ dlib.toTimeString = function (number, options = {}) {
  * @returns {number}
  */
 dlib.startOfDay = function (number, utc = false) {
-  if(utc)  return moment().utc(number).startOf("day").valueOf();
+  if (utc) return moment().utc(number).startOf("day").valueOf();
   return moment(number).startOf("day").valueOf();
 };
 
@@ -1123,7 +1123,7 @@ dlib.startOfDay = function (number, utc = false) {
  * @returns {number}
  */
 dlib.endOfDay = function (number, utc = false) {
-  if(utc)  return moment().utc(number).endOf("day").valueOf();
+  if (utc) return moment().utc(number).endOf("day").valueOf();
   return moment(number).endOf("day").valueOf();
 };
 
@@ -1939,8 +1939,8 @@ dlib.loadFileAsync = function (path) {
 dlib.importFiles = function (cache, files, trimTopLevelFolder = true, trimExtension = true) {
   files.keys().forEach(key => {
     let cacheKey = key;
-    if(trimTopLevelFolder) cacheKey = cacheKey.replace(/\.[\\\/]/,'');
-    if(trimExtension) cacheKey = cacheKey.replace(/\..*$/,'');
+    if (trimTopLevelFolder) cacheKey = cacheKey.replace(/\.[\\\/]/, '');
+    if (trimExtension) cacheKey = cacheKey.replace(/\..*$/, '');
     cache[cacheKey] = files(key).default;
   });
 };
@@ -2031,6 +2031,18 @@ dlib.openURL = function (pathname, options = {}) {
       this.getHistory().push(location);
     }
   }
+};
+
+// ----------- Network Helpers --------------------------------------------------------------------------------------------------
+
+/**
+ * Convert's an integer ip number into a x.x.x.x string
+ * @param ipNum
+ * @returns {string}
+ */
+dlib.numberToIPv4 = function (ipNum) {
+  if (!ipNum) return "0.0.0.0";
+  return `${(ipNum / 16777216) % 256}.${(ipNum / 65536) % 256}.${(ipNum / 256) % 256}.${ipNum % 256}`;
 };
 
 module.exports = dlib;
