@@ -293,6 +293,7 @@ dlib.userAgent = function () {
   this.isAndroid  = this.ua.indexOf("Android") >= 0;
   this.isChromeOS = this.ua.indexOf(" CrOS ") >= 0;
   this.isMobile   = this.isIPad || this.isAndroid;
+  return this;
 };
 
 /**
