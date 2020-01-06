@@ -2221,7 +2221,7 @@ dlib.getSubdivisionLong = function (subdivisionShort) {
  */
 dlib.getCountries = function() {
   let countries = [];
-  _.map(iso_3166_2, (value, key) => countries.push({value: key, label: value}));
+  _.map(iso_3166_2, (value, key) => countries.push({code: key, name: value}));
   return countries;
 };
 
@@ -2232,7 +2232,7 @@ dlib.getCountries = function() {
  */
 dlib.getSubdivisions = function(country) {
   let subdivisions = [];
-  _.map(_.get(iso_3166_2, [country, "divisions"], {}), (value, key) => subdivisions.push({value: key, label: value}));
+  _.map(_.get(iso_3166_2, [country, "divisions"], {}), (value, key) => subdivisions.push({code: key, name: value}));
   return subdivisions;
 };
 
