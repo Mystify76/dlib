@@ -2216,6 +2216,15 @@ dlib.getSubdivisionLong = function (subdivisionShort) {
 };
 
 /**
+ * Get the subdivision compact name from the iso_3166_2 file
+ * @returns string
+ * @param subdivisionShort
+ */
+dlib.getSubdivisionCompact = function (subdivisionShort) {
+  return _.trim(_.replace(_.get(iso_3166_2, [_.nth(_.split(subdivisionShort, "-"), 0), "divisions", subdivisionShort]),/(,.*)|(\(.*\))|(\[.*])/,""));
+};
+
+/**
  * Return an array containing the country list with only the country code and the display name
  * @returns {[]}
  */
@@ -2235,5 +2244,26 @@ dlib.getSubdivisions = function(country) {
   _.map(_.get(iso_3166_2, [country, "divisions"], {}), (value, key) => subdivisions.push({code: key, name: value}));
   return subdivisions;
 };
+
+/**
+ * Return the subdivisions for a specific country but with extra name information trimmed out automatically.
+ * @param country
+ * @returns {[]}
+ */
+dlib.getSubdivisionsCompact = function(country) {
+  let subdivisions = [];
+  _.map(_.get(iso_3166_2, [country, "divisions"], {}), (value, key) => subdivisions.push({code: key, name: _.trim(_.replace(value,/(,.*)|(\(.*\))|(\[.*])/,""))}));
+  return subdivisions;
+};
+
+/**
+ * in the iso, some of the subdivision names are really really big because of extra content provided in brackets and the like.
+ * This function trims that to the bare minimum. Mainly used for display purposes.
+ * @param subdivision
+ */
+dlib.compactSubdivisionName = function(subdivision) {
+  return _.trim(_.replace(subdivision,/(,.*)|(\(.*\))|(\[.*])/,""))
+};
+
 
 module.exports = dlib;
