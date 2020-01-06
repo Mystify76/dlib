@@ -2215,5 +2215,25 @@ dlib.getSubdivisionLong = function (subdivisionShort) {
   return _.get(iso_3166_2, [_.nth(_.split(subdivisionShort, "-"), 0), "divisions", subdivisionShort]);
 };
 
+/**
+ * Return an array containing the country list with only the country code and the display name
+ * @returns {[]}
+ */
+dlib.getCountries = function() {
+  let countries = [];
+  _.map(iso_3166_2, (value, key) => countries.push({value: key, label: value}));
+  return countries;
+};
+
+/**
+ * Return the subdivisions for a specific country
+ * @param country
+ * @returns {[]}
+ */
+dlib.getSubdivisions = function(country) {
+  let subdivisions = [];
+  _.map(_.get(iso_3166_2, [country, "divisions"], {}), (value, key) => subdivisions.push({value: key, label: value}));
+  return subdivisions;
+};
 
 module.exports = dlib;
