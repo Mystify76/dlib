@@ -1984,7 +1984,9 @@ dlib.copyToClipboard = function (str) {
   el.setAttribute('readonly', '');
   el.style.position = 'absolute';
   el.style.left     = '-9999px';
+  el.style.zIndex = 9999999999;
   this.getDocument().body.appendChild(el);
+  el.focus();
   el.select();
   this.getDocument().execCommand('copy');
   this.getDocument().body.removeChild(el);
