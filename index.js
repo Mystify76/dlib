@@ -1977,19 +1977,20 @@ dlib.getReqProp = function (req, prop = undefined, defaultValue = undefined) {
  * Copy a bit of text to the clipboard
  * This function requires the document be set in the initializer
  * @param str - the string to put into the clipboard.
+ * @param parentElement - depending on the dom layout, putting the element in the root body may not always work so you can specify where you want the element to appear.
  */
-dlib.copyToClipboard = function (str) {
-  const el = this.getDocument().createElement('textarea');
+dlib.copyToClipboard = function (str, parentElement = undefined) {
+  if(!parentElement) parentElement = this.getDocument();
+  const el = parentElement.createElement('textarea');
   el.value = str;
   el.setAttribute('readonly', '');
   el.style.position = 'absolute';
-  el.style.left     = '-9999px';
+  el.style.left     = '-99999999px';
   el.style.zIndex = 9999999999;
-  this.getDocument().body.appendChild(el);
-  el.focus();
+  parentElement.body.appendChild(el);
   el.select();
-  this.getDocument().execCommand('copy');
-  this.getDocument().body.removeChild(el);
+  parentElement.execCommand('copy');
+  parentElement.body.removeChild(el);
 };
 
 /**
