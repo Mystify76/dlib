@@ -1980,17 +1980,17 @@ dlib.getReqProp = function (req, prop = undefined, defaultValue = undefined) {
  * @param parentElement - depending on the dom layout, putting the element in the root body may not always work so you can specify where you want the element to appear.
  */
 dlib.copyToClipboard = function (str, parentElement = undefined) {
-  if(!parentElement) parentElement = this.getDocument();
-  const el = parentElement.createElement('textarea');
+  if(!parentElement) parentElement = this.getDocument().body;
+  const el = this.getDocument().createElement('textarea');
   el.value = str;
   el.setAttribute('readonly', '');
   el.style.position = 'absolute';
   el.style.left     = '-99999999px';
   el.style.zIndex = 9999999999;
-  parentElement.body.appendChild(el);
+  parentElement.appendChild(el);
   el.select();
-  parentElement.execCommand('copy');
-  parentElement.body.removeChild(el);
+  this.getDocument().execCommand('copy');
+  parentElement.removeChild(el);
 };
 
 /**
