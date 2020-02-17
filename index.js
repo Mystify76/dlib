@@ -2240,7 +2240,7 @@ dlib.getSubdivisionCompact = function (subdivisionShort) {
  */
 dlib.getCountries = function() {
   let countries = [];
-  _.map(iso_3166_2, (value, key) =>  countries.push({code: key, name: value["name"]}));
+  _.map(iso_3166_2, (value, key) =>  countries.push({code: key, name: value.name, str: _.toString(value.name), value: value, get: _.get(value,"name")}));
   return countries;
 };
 
