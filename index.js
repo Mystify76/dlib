@@ -92,7 +92,7 @@ dlib.combinePropsToString = function (obj, props = [], delimiter = " ", trim = t
  * @returns {string}
  */
 dlib.stripTags = function (html) {
-  if (!this.getDocument()) throw new Error("No document defined");
+  if (!this.getDocument || !this.getDocument()) throw new Error("dlib error: No document defined");
   let div       = this.getDocument().createElement("div");
   div.innerHTML = html;
   return div.textContent || div.innerText || "";
@@ -261,6 +261,7 @@ dlib.normalize = function (str, removeSpaces = false) {
  * @returns {object}
  */
 dlib.userAgent = function () {
+  if(!this.getWindow || !this.getWindow()) throw new Error("dlib error: getWindow not defined");
   this.os         = typeof navigator === "object" ? (navigator.platform.match(/mac|win|linux/i) || ["other"])[0].toLowerCase() : "";
   this.ua         = typeof navigator === "object" ? navigator.userAgent : "";
   this.OS         = {
@@ -362,6 +363,7 @@ const removeNilPropertiesOmitter = function (options, value, key) {
  * @return component
  */
 dlib.addKeys = function (component) {
+  if(!this.getReact || !this.getReact()) throw new Error("dlib error: getReact not defined");
   let react = this.getReact();
   if (!react) throw new Error("No React defined");
   if (!react || !component) return component;
@@ -1574,7 +1576,7 @@ dlib.resizeImage = function (imgSource, targetWidth, targetHeight, keepAspectRat
   return new Promise((resolve, reject, onCancel) => {
     let cancelled = false;
     onCancel && onCancel(() => cancelled = true);
-    if (!this.getDocument()) return reject("document not defined");
+    if (!this.getDocument || !this.getDocument()) return reject("dlib error: document not defined");
     let image     = new Image();
     image.onerror = () => reject();
     image.onload  = (e) => {
@@ -1772,7 +1774,8 @@ dlib.rect = class rect {
  * @returns {object}
  */
 dlib.getViewport = function () {
-  if (!this.getDocument()) throw new Error("No document defined");
+  if (!this.getWindow || !this.getWindow()) throw new Error("dlib error: No window defined");
+  if (!this.getDocument || !this.getDocument()) throw new Error("dlib error: No document defined");
   let w = Math.max(this.getDocument().documentElement.clientWidth, this.getWindow().innerWidth || 0);
   let h = Math.max(this.getDocument().documentElement.clientHeight, this.getWindow().innerHeight || 0);
 
@@ -1781,10 +1784,10 @@ dlib.getViewport = function () {
 
 /**
  * Tries to set focus on the next element in the tab order
- * This function requires the intializer be called to set the document object.
+ * This function requires the initializer be called to set the document object.
  */
 dlib.focusNextElement = function () {
-  if (!this.getDocument()) throw new Error("No document defined");
+  if (!this.getDocument || !this.getDocument()) throw new Error("dlib error: No document defined");
   let currentFocus = this.getDocument().activeElement;
   let elements     = [...this.getDocument().querySelectorAll("a[href]:not([tabindex='-1']), area[href]:not([tabindex='-1']), input:not([disabled]):not([tabindex='-1']), select:not([disabled]):not([tabindex='-1']), textarea:not([disabled]):not([tabindex='-1']), button:not([disabled]):not([tabindex='-1']), iframe:not([tabindex='-1']), [tabindex]:not([tabindex='-1']), [contentEditable=true]:not([tabindex='-1'])")];
   elements.sort((a, b) => parseInt(a.tabIndex || 0) - parseInt(b.tabIndex || 0));
@@ -1980,6 +1983,7 @@ dlib.getReqProp = function (req, prop = undefined, defaultValue = undefined) {
  * @param parentElement - depending on the dom layout, putting the element in the root body may not always work so you can specify where you want the element to appear.
  */
 dlib.copyToClipboard = function (str, parentElement = undefined) {
+  if(!this.getDocument || !this.getDocument()) throw new Error("dlib error: No document defined.");
   if(!parentElement) parentElement = this.getDocument().body;
   const el = this.getDocument().createElement('textarea');
   el.value = str;
@@ -2015,8 +2019,9 @@ dlib.openURLOptions = {
  * Open a url either using the history object or the window object. Both need to be set by the initializer for this to work.
  */
 dlib.openURL = function (pathname, options = {}) {
-  if (!this.getWindow()) throw new Error("No window defined");
-  if (!this.getHistory()) throw new Error("No history defined");
+  if (!this.getHistory()) throw new Error("dlib error: No history defined");
+  if (!this.getWindow()) throw new Error("dlib error: No window defined");
+  if (!this.getHistory()) throw new Error("dlib error: No history defined");
   _.defaults(options, this.openURLOptions);
 
   let queryObject = queryString.stringify(_.merge({}, options.useQueryString && this.getWindow().query, options.params));
