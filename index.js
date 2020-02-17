@@ -12,7 +12,9 @@ Promise.config({warnings: {wForgottenReturn: false}, cancellation: true});
 let lut = [];
 for (let i = 0; i < 256; i++) { lut[i] = (i < 16 ? '0' : '') + (i).toString(16); }
 
-const dlib = {};
+const dlib = {
+  iso_3166_2: iso_3166_2
+};
 
 /**
  * A function that can be set when the app starts up to allow this module to get certain app variables.
@@ -2238,7 +2240,6 @@ dlib.getSubdivisionCompact = function (subdivisionShort) {
  */
 dlib.getCountries = function() {
   let countries = [];
-  return [{code:"CA", iso_3166_2["37"].name}];
   _.map(iso_3166_2, (value, key) =>  countries.push({code: key, name: value.name}));
   return countries;
 };
