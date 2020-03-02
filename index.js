@@ -1136,6 +1136,28 @@ dlib.endOfDay = function (number, utc = false) {
 };
 
 /**
+ * takes a datetime in milliseconds and returns the start of current hour in milliseconds
+ * @param number A number in milliseconds
+ * @param utc - the milliseconds is in utc time
+ * @returns {number}
+ */
+dlib.startOfHour = function (number, utc = false) {
+  if (utc) return moment().utc(number).startOf("hour").valueOf();
+  return moment(number).startOf("hour").valueOf();
+};
+
+/**
+ * takes a datetime in milliseconds and returns the end of current hour in milliseconds
+ * @param number A number in milliseconds
+ * @param utc - the milliseconds is in utc time
+ * @returns {number}
+ */
+dlib.endOfHour = function (number, utc = false) {
+  if (utc) return moment().utc(number).endOf("hour").valueOf();
+  return moment(number).endOf("hour").valueOf();
+};
+
+/**
  * Takes an object that has year, month, day, hour, minute, second properties and returns a formatted date string.
  * @returns {number}
  * @param object
