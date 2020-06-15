@@ -5,7 +5,14 @@
   "main": "index.js",
   "author": "David Gallant",
   "license": "MIT",
-  "devDependencies": {},
+  "scripts": {
+    "deploy": "node deploy.js"
+  },
+  "devDependencies": {
+    "@mystify/buildmanagement": "^1.0.9",
+    "prompt-promise": "^1.0.3",
+    "simple-git": "^2.6.0"
+  },
   "dependencies": {
     "axios": "^0.19.2",
     "bluebird": "^3.7.2",
