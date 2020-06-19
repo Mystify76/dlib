@@ -263,7 +263,7 @@ dlib.normalize = function (str, removeSpaces = false) {
  * @returns {object}
  */
 dlib.userAgent = function () {
-  if(!this.getWindow || !this.getWindow()) throw new Error("dlib error: getWindow not defined");
+  if (!this.getWindow || !this.getWindow()) throw new Error("dlib error: getWindow not defined");
   this.os         = typeof navigator === "object" ? (navigator.platform.match(/mac|win|linux/i) || ["other"])[0].toLowerCase() : "";
   this.ua         = typeof navigator === "object" ? navigator.userAgent : "";
   this.OS         = {
@@ -365,7 +365,7 @@ const removeNilPropertiesOmitter = function (options, value, key) {
  * @return component
  */
 dlib.addKeys = function (component) {
-  if(!this.getReact || !this.getReact()) throw new Error("dlib error: getReact not defined");
+  if (!this.getReact || !this.getReact()) throw new Error("dlib error: getReact not defined");
   let react = this.getReact();
   if (!react) throw new Error("No React defined");
   if (!react || !component) return component;
@@ -1968,11 +1968,14 @@ dlib.loadFileAsync = function (path) {
  * @param trimExtension
  */
 dlib.importFiles = function (cache, files, trimTopLevelFolder = true, trimExtension = true) {
-  files.keys().forEach(key => {
-    let cacheKey = key;
-    if (trimTopLevelFolder) cacheKey = cacheKey.replace(/\.[\\\/]/, '');
-    if (trimExtension) cacheKey = cacheKey.replace(/\..*$/, '');
-    cache[cacheKey] = files(key).default;
+  return new Promise((resolve, reject) => {
+    files.keys().forEach(key => {
+      let cacheKey = key;
+      if (trimTopLevelFolder) cacheKey = cacheKey.replace(/\.[\\\/]/, '');
+      if (trimExtension) cacheKey = cacheKey.replace(/\..*$/, '');
+      cache[cacheKey] = files(key).default;
+      if (_.keys(cache).length === files.keys().length) resolve(cache);
+    });
   });
 };
 
@@ -2007,14 +2010,14 @@ dlib.getReqProp = function (req, prop = undefined, defaultValue = undefined) {
  * @param parentElement - depending on the dom layout, putting the element in the root body may not always work so you can specify where you want the element to appear.
  */
 dlib.copyToClipboard = function (str, parentElement = undefined) {
-  if(!this.getDocument || !this.getDocument()) throw new Error("dlib error: No document defined.");
-  if(!parentElement) parentElement = this.getDocument().body;
+  if (!this.getDocument || !this.getDocument()) throw new Error("dlib error: No document defined.");
+  if (!parentElement) parentElement = this.getDocument().body;
   const el = this.getDocument().createElement('textarea');
   el.value = str;
   el.setAttribute('readonly', '');
   el.style.position = 'absolute';
   el.style.left     = '-99999999px';
-  el.style.zIndex = 9999999999;
+  el.style.zIndex   = 9999999999;
   parentElement.appendChild(el);
   el.select();
   this.getDocument().execCommand('copy');
@@ -2113,64 +2116,64 @@ dlib.getLocationFromIp = function (ip, provider = "freegeoip", extra = false, ra
       if (response.status === 200) {
         if (raw) return resolve(response);
         let location = response.data;
-        let retval = {};
+        let retval   = {};
         switch (provider) {
           case "extremeiplookup":
             retval = {
-              ip: ip,
-              country: location.countryCode,
+              ip         : ip,
+              country    : location.countryCode,
               subdivision: iso_3166_2[location.countryCode] ? _.findKey(iso_3166_2[location.countryCode].divisions, name => this.normalize(name).includes(this.normalize(location.region))) : "",
-              city: location.city,
-              zip: ""
+              city       : location.city,
+              zip        : ""
             };
-            if(extra) {
+            if (extra) {
               retval.subdivision_name = location.region;
-              retval.country_name = location.country;
-              retval.continent_name = location.continent;
+              retval.country_name     = location.country;
+              retval.continent_name   = location.continent;
             }
             break;
           case "ipgeolocation":
             retval = {
-              ip: location.ip,
-              country: location.country_code2,
+              ip         : location.ip,
+              country    : location.country_code2,
               subdivision: iso_3166_2[location.country_code2] ? _.findKey(iso_3166_2[location.country_code2].divisions, name => this.normalize(name).includes(this.normalize(location.state_prov))) : "",
-              city: location.city,
-              zip: location.zipcode
+              city       : location.city,
+              zip        : location.zipcode
             };
-            if(extra) {
+            if (extra) {
               retval.subdivision_name = location.state_prov;
-              retval.country_name = location.country_name;
-              retval.continent = location.continent_code;
-              retval.continent_name = location.continent_name;
+              retval.country_name     = location.country_name;
+              retval.continent        = location.continent_code;
+              retval.continent_name   = location.continent_name;
             }
             break;
           case "keycdn":
             location = location.data.geo;
-            retval = {
-              ip: location.ip,
-              country: location.country_code,
+            retval   = {
+              ip         : location.ip,
+              country    : location.country_code,
               subdivision: `${location.country_code}-${location.region_code}`,
-              city: location.city,
-              zip: location.postal_code
+              city       : location.city,
+              zip        : location.postal_code
             };
-            if(extra) {
+            if (extra) {
               retval.subdivision_name = location.region_name;
-              retval.country_name = location.country_name;
-              retval.continent = location.continent_code;
-              retval.continent_name = location.continent_name;
+              retval.country_name     = location.country_name;
+              retval.continent        = location.continent_code;
+              retval.continent_name   = location.continent_name;
             }
             break;
           case "freegeoip":
             retval = {
-              ip: location.ip,
-              country: location.country_code,
+              ip         : location.ip,
+              country    : location.country_code,
               subdivision: `${location.country_code}-${location.region_code}`,
-              city: location.city,
-              zip: location.zip_code
+              city       : location.city,
+              zip        : location.zip_code
             };
-            if(extra) {
+            if (extra) {
               retval.subdivision_name = location.region_name;
-              retval.country_name = location.country_name;
+              retval.country_name     = location.country_name;
             }
             break;
         }
@@ -2253,16 +2256,16 @@ dlib.getSubdivisionLong = function (subdivisionShort) {
  * @param subdivisionShort
  */
 dlib.getSubdivisionCompact = function (subdivisionShort) {
-  return _.trim(_.replace(_.get(iso_3166_2, [_.nth(_.split(subdivisionShort, "-"), 0), "divisions", subdivisionShort]),/(,.*)|(\(.*\))|(\[.*])/,""));
+  return _.trim(_.replace(_.get(iso_3166_2, [_.nth(_.split(subdivisionShort, "-"), 0), "divisions", subdivisionShort]), /(,.*)|(\(.*\))|(\[.*])/, ""));
 };
 
 /**
  * Return an array containing the country list with only the country code and the display name
  * @returns {[]}
  */
-dlib.getCountries = function() {
+dlib.getCountries = function () {
   let countries = [];
-  _.map(iso_3166_2, (value, key) =>  countries.push({code: key, name: value.name}));
+  _.map(iso_3166_2, (value, key) => countries.push({code: key, name: value.name}));
   return countries;
 };
 
@@ -2271,7 +2274,7 @@ dlib.getCountries = function() {
  * @param country
  * @returns {[]}
  */
-dlib.getSubdivisions = function(country) {
+dlib.getSubdivisions = function (country) {
   let subdivisions = [];
   _.map(_.get(iso_3166_2, [country, "divisions"], {}), (value, key) => subdivisions.push({code: key, name: value}));
   return subdivisions;
@@ -2282,9 +2285,9 @@ dlib.getSubdivisions = function(country) {
  * @param country
  * @returns {[]}
  */
-dlib.getSubdivisionsCompact = function(country) {
+dlib.getSubdivisionsCompact = function (country) {
   let subdivisions = [];
-  _.map(_.get(iso_3166_2, [country, "divisions"], {}), (value, key) => subdivisions.push({code: key, name: _.trim(_.replace(value,/(,.*)|(\(.*\))|(\[.*])/,""))}));
+  _.map(_.get(iso_3166_2, [country, "divisions"], {}), (value, key) => subdivisions.push({code: key, name: _.trim(_.replace(value, /(,.*)|(\(.*\))|(\[.*])/, ""))}));
   return subdivisions;
 };
 
@@ -2293,9 +2296,8 @@ dlib.getSubdivisionsCompact = function(country) {
  * This function trims that to the bare minimum. Mainly used for display purposes.
  * @param subdivision
  */
-dlib.compactSubdivisionName = function(subdivision) {
-  return _.trim(_.replace(subdivision,/(,.*)|(\(.*\))|(\[.*])/,""))
+dlib.compactSubdivisionName = function (subdivision) {
+  return _.trim(_.replace(subdivision, /(,.*)|(\(.*\))|(\[.*])/, ""))
 };
-
 
 module.exports = dlib;
