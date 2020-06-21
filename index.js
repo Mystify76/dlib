@@ -13,8 +13,19 @@ let lut = [];
 for (let i = 0; i < 256; i++) { lut[i] = (i < 16 ? '0' : '') + (i).toString(16); }
 
 const dlib = {
-  iso_3166_2: iso_3166_2
+  iso_3166_2: iso_3166_2,
+  debug: false,
+  debugColorMethods: false
 };
+
+function paramsToJSON(...args) {
+  let obj = {};
+  args.forEach(arg => {
+    arg = arg.indexOf(" = ") < 0 ? arg : arg.substr(0, arg.indexOf(" = "));
+    obj[arg] = eval(arg);
+  });
+  return JSON.stringify(args, null, 2);
+}
 
 /**
  * A function that can be set when the app starts up to allow this module to get certain app variables.
@@ -25,6 +36,7 @@ const dlib = {
  * @param getHistory
  */
 dlib.initializer = function (getWindow, getDocument, getReact, getHistory) {
+  if(this.debug) console.log(`dlib - "initializer"\n${paramsToJSON({getWindow, getDocument, getReact, getHistory})}`);
 
   this.getWindow   = getWindow;
   this.getDocument = getDocument;
@@ -40,6 +52,7 @@ dlib.initializer = function (getWindow, getDocument, getReact, getHistory) {
  * @returns {string}
  */
 dlib.UUID = function (noDash = false) {
+  if(this.debug) console.log(`dlib - "UUID"\n${paramsToJSON({noDash})}`);
   let d0 = Math.random() * 0xffffffff | 0;
   let d1 = Math.random() * 0xffffffff | 0;
   let d2 = Math.random() * 0xffffffff | 0;
@@ -57,6 +70,7 @@ dlib.UUID = function (noDash = false) {
  * @returns {number}
  */
 dlib.toNumber = function (number, int = false) {
+  if(this.debug) console.log(`dlib - "toNumber"\n${paramsToJSON({number, int})}`);
   if (int) {
     return !isNaN(number) && !isNaN(parseInt(number)) ? parseInt(number) : undefined;
   } else {
@@ -70,6 +84,7 @@ dlib.toNumber = function (number, int = false) {
  * @returns {boolean}
  */
 dlib.isSafe = function (value) {
+  if(this.debug) console.log(`dlib - "isSafe"\n${paramsToJSON({value})}`);
   return !_.isNaN(value) && value !== undefined && value !== null;
 };
 
@@ -82,6 +97,7 @@ dlib.isSafe = function (value) {
  * @returns {string}
  */
 dlib.combinePropsToString = function (obj, props = [], delimiter = " ", trim = true) {
+  if(this.debug) console.log(`dlib - "combinePropsToString"\n${paramsToJSON({obj, props,   trim})}`);
   let value = props.map(path => _.get(obj, path, "")).join(delimiter);
   if (trim) value = value.trim();
   return value;
@@ -94,6 +110,7 @@ dlib.combinePropsToString = function (obj, props = [], delimiter = " ", trim = t
  * @returns {string}
  */
 dlib.stripTags = function (html) {
+  if(this.debug) console.log(`dlib - "stripTags"\n${paramsToJSON({html})}`);
   if (!this.getDocument || !this.getDocument()) throw new Error("dlib error: No document defined");
   let div       = this.getDocument().createElement("div");
   div.innerHTML = html;
@@ -106,6 +123,7 @@ dlib.stripTags = function (html) {
  * @returns {object}
  */
 dlib.rectToObject = function (rect) {
+  if(this.debug) console.log(`dlib - "rectToObject"\n${paramsToJSON({rect})}`);
   return {
     left  : rect.left,
     right : rect.right,
@@ -122,6 +140,7 @@ dlib.rectToObject = function (rect) {
  * @returns {object}
  */
 dlib.removeFunctions = function (obj) {
+  if(this.debug) console.log(`dlib - "removeFunctions"\n${paramsToJSON({obj})}`);
   return _.omitBy(obj, (value, key) => {
     if (_.isObject(value)) return this.removeFunctions(value);
     return typeof value === "function";
@@ -135,6 +154,7 @@ dlib.removeFunctions = function (obj) {
  * @returns {object}
  */
 dlib.findLast = function (array, iterator) {
+  if(this.debug) console.log(`dlib - "findLast"\n${paramsToJSON({array, iterator})}`);
   return array.slice().reverse().find((obj, index) => iterator(obj, (array.length - 1) - index));
 };
 
@@ -145,6 +165,7 @@ dlib.findLast = function (array, iterator) {
  * @returns {number}
  */
 dlib.findLastIndex = function (array, iterator) {
+  if(this.debug) console.log(`dlib - "findLastIndex"\n${paramsToJSON({array, iterator})}`);
   return (array.length - 1) - array.slice().reverse().findIndex(iterator);
 };
 
@@ -155,6 +176,7 @@ dlib.findLastIndex = function (array, iterator) {
  * @returns {number}
  */
 dlib.objectToDotPaths = function (source, circularReferences = []) {
+  if(this.debug) console.log(`dlib - "objectToDotPaths"\n${paramsToJSON({source, circularReferences})}`);
   let keys = [];
   if (circularReferences.some(obj => obj === source)) return keys;
   circularReferences.push(source);
@@ -177,6 +199,7 @@ dlib.objectToDotPaths = function (source, circularReferences = []) {
  * @returns {number}
  */
 dlib.objectToDotPathsAsync = function (source, circularReferences = []) {
+  if(this.debug) console.log(`dlib - "objectToDotPathsAsync"\n${paramsToJSON({source, circularReferences})}`);
   return new Promise((resolve, reject) => {
     let keys = [];
     if (circularReferences.some(obj => obj === source)) return resolve(keys);
@@ -216,6 +239,7 @@ dlib.objectToDotPathsAsync = function (source, circularReferences = []) {
  * @returns {object}
  */
 dlib.getArgWithProp = function (args, prop) {
+  if(this.debug) console.log(`dlib - "getArgWithProp"\n${paramsToJSON({args, prop})}`);
   let response = undefined;
   _.transform(args, (result, value, key, obj) => _.has(value, prop) ? !(response = value[prop]) : true);
   return response;
@@ -227,6 +251,7 @@ dlib.getArgWithProp = function (args, prop) {
  * @returns {{arguments: Array, event: undefined}}
  */
 dlib.splitEvent = function (arr) {
+  if(this.debug) console.log(`dlib - "splitEvent"\n${paramsToJSON({arr})}`);
   let response = {
     arguments: _.clone(arr),
     event    : undefined
@@ -251,6 +276,7 @@ dlib.splitEvent = function (arr) {
  * @returns {string}
  */
 dlib.normalize = function (str, removeSpaces = false) {
+  if(this.debug) console.log(`dlib - "normalize"\n${paramsToJSON({str, removeSpaces})}`);
   let re = new RegExp("((?!(\\w|\\.|@|_|-|!| )).)*", "g");
   str    = _.deburr(_.toLower(_.trim(str))).replace(re, "");
   if (removeSpaces) str = str.replace(/ /g, "");
@@ -263,6 +289,7 @@ dlib.normalize = function (str, removeSpaces = false) {
  * @returns {object}
  */
 dlib.userAgent = function () {
+  if(this.debug) console.log(`dlib - "userAgent"\n${paramsToJSON({})}`);
   if (!this.getWindow || !this.getWindow()) throw new Error("dlib error: getWindow not defined");
   this.os         = typeof navigator === "object" ? (navigator.platform.match(/mac|win|linux/i) || ["other"])[0].toLowerCase() : "";
   this.ua         = typeof navigator === "object" ? navigator.userAgent : "";
@@ -305,6 +332,7 @@ dlib.userAgent = function () {
  * @return {Array} - the compacted and concatenated array
  */
 dlib.concatSm = function (...arrays) {
+  if(this.debug) console.log(`dlib - "concatSm"\n${paramsToJSON({...arrays})}`);
   return _.compact(_.concat(...arrays));
 };
 
@@ -316,6 +344,7 @@ dlib.concatSm = function (...arrays) {
  * @return {Array} - the compacted and concatenated array
  */
 dlib.truncate = function (string, length, trailer = "") {
+  if(this.debug) console.log(`dlib - "truncate"\n${paramsToJSON({string, length, trailer})}`);
   return _.truncate(string, {length: length, omission: trailer});
 };
 
@@ -325,6 +354,7 @@ dlib.truncate = function (string, length, trailer = "") {
  * @param object
  */
 dlib.removeEmptyProperties = function (object) {
+  if(this.debug) console.log(`dlib - "removeEmptyProperties"\n${paramsToJSON({object})}`);
   let keys = _.keys(object);
   keys.forEach(key => {
     if (_.isObjectLike(object[key])) this.removeEmptyProperties(object[key]);
@@ -345,6 +375,7 @@ dlib.removeEmptyProperties = function (object) {
  * @returns {object}
  */
 dlib.removeNilProperties = function (obj, removeUndefined = true, removeNull = true, removeEmpty = false, removeZero = false, removeFalse = false, removeOthers = undefined) {
+  if(this.debug) console.log(`dlib - "removeNilProperties"\n${paramsToJSON({obj, removeUndefined,      removeOthers})}`);
   let options = {removeUndefined, removeNull, removeEmpty, removeZero, removeFalse, removeOthers};
   return removeNilPropertiesWorker(obj, options);
 };
@@ -365,6 +396,7 @@ const removeNilPropertiesOmitter = function (options, value, key) {
  * @return component
  */
 dlib.addKeys = function (component) {
+  if(this.debug) console.log(`dlib - "addKeys"\n${paramsToJSON({component})}`);
   if (!this.getReact || !this.getReact()) throw new Error("dlib error: getReact not defined");
   let react = this.getReact();
   if (!react) throw new Error("No React defined");
@@ -388,6 +420,7 @@ dlib.addKeys = function (component) {
  * @param array
  */
 dlib.randomizeArray = function (array) {
+  if(this.debug) console.log(`dlib - "randomizeArray"\n${paramsToJSON({array})}`);
   array        = _.clone(array);
   let newArray = [];
   while (array.length > 0) {
@@ -405,6 +438,7 @@ dlib.randomizeArray = function (array) {
  * @return {string}
  */
 dlib.formatCurrency = function (amount, currency, locale, showCurrency = true) {
+  if(this.debug) console.log(`dlib - "formatCurrency"\n${paramsToJSON({amount, currency, locale, showCurrency})}`);
   amount   = amount || 0;
   currency = currency || "USD";
   locale   = locale || "en-CA";
@@ -419,6 +453,7 @@ dlib.formatCurrency = function (amount, currency, locale, showCurrency = true) {
  * @return {*}
  */
 dlib.escapeRegEx = function (string) {
+  if(this.debug) console.log(`dlib - "escapeRegEx"\n${paramsToJSON({string})}`);
   return string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 };
 
@@ -430,6 +465,7 @@ dlib.escapeRegEx = function (string) {
  * @return {number}
  */
 dlib.unformatCurrency = function (formattedValue, currency, locale) {
+  if(this.debug) console.log(`dlib - "unformatCurrency"\n${paramsToJSON({formattedValue, currency, locale})}`);
   let cf          = new Intl.NumberFormat(locale, {style: 'currency', currency: currency, currencyDisplay: "code"});
   let options     = cf.resolvedOptions();
   let parts       = cf.formatToParts(9999.99);
@@ -453,6 +489,7 @@ dlib.unformatCurrency = function (formattedValue, currency, locale) {
  * @param emptyIsValid
  */
 dlib.isEmailValid = function (email, emptyIsValid = false) {
+  if(this.debug) console.log(`dlib - "isEmailValid"\n${paramsToJSON({email, emptyIsValid})}`);
   if (!email) return emptyIsValid;
   let parts = email.split("@");
   if (parts.length !== 2) return false;
@@ -473,6 +510,7 @@ dlib.isEmailValid = function (email, emptyIsValid = false) {
  * @returns {object}
  */
 dlib.setDocumentValue = function (object, path, value) {
+  if(this.debug) console.log(`dlib - "setDocumentValue"\n${paramsToJSON({object, path, value})}`);
   if (!object || !path) return object;
   if (!_.isArray(path)) path = _.split(path, ".");
 
@@ -496,6 +534,7 @@ dlib.setDocumentValue = function (object, path, value) {
  * @returns {string}
  */
 dlib.generatePassword = function (lowerCase = false, upperCase = true, numbers = true, symbols = false, minLength = 8, maxLength = 8, allowDuplicates = true, preventRepeatingCharacters = true, excludeConfusing = true) {
+  if(this.debug) console.log(`dlib - "generatePassword"\n${paramsToJSON({lowerCase,         excludeConfusing})}`);
   let availableCharacters = "";
   if (lowerCase) availableCharacters += "abcdefghijklmnopqrstuvwxyz";
   if (upperCase) availableCharacters += "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -535,6 +574,7 @@ dlib.generatePassword = function (lowerCase = false, upperCase = true, numbers =
  * @returns {(number|string|object|boolean)}
  */
 dlib.getReqProp = function (req, prop = undefined, defaultValue = undefined) {
+  if(this.debug) console.log(`dlib - "getReqProp"\n${paramsToJSON({req, prop,  defaultValue})}`);
   if (!req) return undefined;
 
   let values = undefined;
@@ -555,6 +595,7 @@ dlib.getReqProp = function (req, prop = undefined, defaultValue = undefined) {
  * @returns {object} - a new object of all the properties of each object merged together.
  * **/
 dlib.mergeClasses = function (...classes) {
+  if(this.debug) console.log(`dlib - "mergeClasses"\n${paramsToJSON({...classes})}`);
   classes = _.compact(classes);
   classes = classes.filter(cls => _.isObjectLike(cls));
   if (classes.length === 0) return {};
@@ -573,6 +614,7 @@ dlib.mergeClasses = function (...classes) {
  * @return {object}
  */
 dlib.convertToObject = function (obj, removeDoubleUnderscoreProperties = true) {
+  if(this.debug) console.log(`dlib - "convertToObject"\n${paramsToJSON({obj, removeDoubleUnderscoreProperties})}`);
   if (_.isNil(obj)) return obj;
 
   function processObject(obj) {
@@ -607,6 +649,7 @@ dlib.convertToObject = function (obj, removeDoubleUnderscoreProperties = true) {
  * @return object
  */
 dlib.getSearchTerms = function (string, normalize = true) {
+  if(this.debug) console.log(`dlib - "getSearchTerms"\n${paramsToJSON({string, normalize})}`);
   let results = (string || "").match(/".*?"|[\w.']+/g) || [];
   results     = _.uniq(_.compact(results));
   return normalize ? results.map(obj => this.normalize(obj)) : results;
@@ -622,6 +665,7 @@ dlib.getSearchTerms = function (string, normalize = true) {
  * @param query
  */
 dlib.cleanUpAggregateQuery = function (query) {
+  if(this.debug) console.log(`dlib - "cleanUpAggregateQuery"\n${paramsToJSON({query})}`);
   const checkChildren = child => {
     if (_.isArray(child)) {
       for (let i = 0; i < child.length; i++) {
@@ -665,6 +709,7 @@ dlib.cleanUpAggregateQuery = function (query) {
  * @return object
  */
 dlib.parseAggregateResults = function (results) {
+  if(this.debug) console.log(`dlib - "parseAggregateResults"\n${paramsToJSON({results})}`);
   return {
     count  : _.get(results, [0, "count", 0, "count"], 0),
     records: _.get(results, [0, "records"], [])
@@ -679,6 +724,7 @@ dlib.parseAggregateResults = function (results) {
  * @return array
  */
 dlib.setAggregateSkip = function (aggregateArray, skip) {
+  if(this.debug) console.log(`dlib - "setAggregateSkip"\n${paramsToJSON({aggregateArray, skip})}`);
 
   const checkPipeline = operator => {
     if (_.isArray(operator)) {
@@ -706,6 +752,7 @@ dlib.setAggregateSkip = function (aggregateArray, skip) {
  * @returns {{arguments: Array, event: undefined}}
  */
 dlib.splitEvent = function (arr) {
+  if(this.debug) console.log(`dlib - "splitEvent"\n${paramsToJSON({arr})}`);
   let response = {
     arguments: _.clone(arr),
     event    : undefined
@@ -731,6 +778,7 @@ dlib.splitEvent = function (arr) {
  * @returns {string}
  */
 dlib.getDateFormatTokenType = function (token) {
+  if(this.debug) console.log(`dlib - "getDateFormatTokenType"\n${paramsToJSON({token})}`);
   switch (token) {
     case "M":
     case "Mo":
@@ -810,6 +858,7 @@ dlib.getDateFormatTokenType = function (token) {
  * @returns {string}
  */
 dlib.getDateFormatTokenUnit = function (token) {
+  if(this.debug) console.log(`dlib - "getDateFormatTokenUnit"\n${paramsToJSON({token})}`);
   switch (token) {
     case "M":
     case "Mo":
@@ -889,6 +938,7 @@ dlib.getDateFormatTokenUnit = function (token) {
  * @returns {string}
  */
 dlib.dateFormatToArray = function (format) {
+  if(this.debug) console.log(`dlib - "dateFormatToArray"\n${paramsToJSON({format})}`);
   let tokens = ["M", "Mo", "MM", "MMM", "MMMM", "Q", "Qo", "D", "Do", "DD", "DDD", "DDDo", "DDDD", "d", "do", "dd", "ddd", "dddd", "e", "E", "w", "wo", "ww", "W", "Wo", "WW", "YY", "YYYY", "Y", "gg", "gggg", "GG", "GGGG", "A", "a", "H", "HH", "h", "hh", "k", "kk", "m", "mm", "s", "ss", "S", "SS", "SSS", "Z", "ZZ", "X", "x"];
   // because I am too lazy to sort the array manually.
   tokens.sort((a, b) => {
@@ -936,6 +986,7 @@ dlib.dateFormatToArray = function (format) {
  * @returns {string}
  */
 dlib.dateFormatToMask = function (format) {
+  if(this.debug) console.log(`dlib - "dateFormatToMask"\n${paramsToJSON({format})}`);
   if (!format) return undefined;
 
   let mask = this.dateFormatToArray(format);
@@ -1030,6 +1081,7 @@ dlib.toTimeStringDefaults = {showDays: "nonZero", showHours: "nonZero", showMinu
  * @returns {string}
  */
 dlib.toTimeString = function (number, options = {}) {
+  if(this.debug) console.log(`dlib - "toTimeString"\n${paramsToJSON({number, options})}`);
   let result, d, h, m, s, x;
   if (_.isNil(number) || _.isNaN(number) || !_.isFinite(number)) return undefined;
   _.defaults(options, this.toTimeStringDefaults);
@@ -1120,6 +1172,7 @@ dlib.toTimeString = function (number, options = {}) {
  * @returns {number}
  */
 dlib.startOfDay = function (number, utc = false) {
+  if(this.debug) console.log(`dlib - "startOfDay"\n${paramsToJSON({number, utc})}`);
   if (utc) return moment().utc(number).startOf("day").valueOf();
   return moment(number).startOf("day").valueOf();
 };
@@ -1131,6 +1184,7 @@ dlib.startOfDay = function (number, utc = false) {
  * @returns {number}
  */
 dlib.endOfDay = function (number, utc = false) {
+  if(this.debug) console.log(`dlib - "endOfDay"\n${paramsToJSON({number, utc})}`);
   if (utc) return moment().utc(number).endOf("day").valueOf();
   return moment(number).endOf("day").valueOf();
 };
@@ -1142,6 +1196,7 @@ dlib.endOfDay = function (number, utc = false) {
  * @returns {number}
  */
 dlib.startOfHour = function (number, utc = false) {
+  if(this.debug) console.log(`dlib - "startOfHour"\n${paramsToJSON({number, utc})}`);
   if (utc) return moment().utc(number).startOf("hour").valueOf();
   return moment(number).startOf("hour").valueOf();
 };
@@ -1153,6 +1208,7 @@ dlib.startOfHour = function (number, utc = false) {
  * @returns {number}
  */
 dlib.endOfHour = function (number, utc = false) {
+  if(this.debug) console.log(`dlib - "endOfHour"\n${paramsToJSON({number, utc})}`);
   if (utc) return moment().utc(number).endOf("hour").valueOf();
   return moment(number).endOf("hour").valueOf();
 };
@@ -1163,6 +1219,7 @@ dlib.endOfHour = function (number, utc = false) {
  * @param object
  */
 dlib.objectToDate = function (object) {
+  if(this.debug) console.log(`dlib - "objectToDate"\n${paramsToJSON({object})}`);
   return new Date(object.year, object.month - 1, object.day, object.hour || object.hours || 0, object.minute || object.minutes || 0, object.second || object.seconds || 0);
 };
 
@@ -1175,6 +1232,7 @@ dlib.objectToDate = function (object) {
  * @returns {object}
  */
 dlib.differenceObj = function (objectToCompareFrom, objectToCompareTo) {
+  if(this.debug) console.log(`dlib - "differenceObj"\n${paramsToJSON({objectToCompareFrom, objectToCompareTo})}`);
   function changes(object, base) {
     return _.transform(object, function (result, value, key) {
       if (!_.isEqual(value, base[key])) {
@@ -1195,6 +1253,7 @@ dlib.differenceObj = function (objectToCompareFrom, objectToCompareTo) {
  * @returns {boolean}
  */
 dlib.areChildrenEqual = function (object, other) {
+  if(this.debug) console.log(`dlib - "areChildrenEqual"\n${paramsToJSON({object, other})}`);
   return _.isEqualWith(object, other, (object, other, key) => {
     if (_.isFunction(object) && _.isFunction(other)) return true;
     if (_.isString(key) && key.startsWith("_")) return true;
@@ -1213,6 +1272,7 @@ dlib.areChildrenEqual = function (object, other) {
  * @returns {number}
  */
 dlib.percent = function (percentage, maxValue = 1, minValue = 0, ascending = true) {
+  if(this.debug) console.log(`dlib - "percent"\n${paramsToJSON({percentage, maxValue,   ascending})}`);
   return ((maxValue - minValue) * Math.max(0, Math.min(1, Math.abs(Number(ascending) - percentage)))) + minValue;
 };
 
@@ -1226,6 +1286,7 @@ dlib.percent = function (percentage, maxValue = 1, minValue = 0, ascending = tru
  * @returns {number}
  */
 dlib.percentf = function (numerator, denominator, maxValue = 1, minValue = 0, ascending = true) {
+  if(this.debug) console.log(`dlib - "percentf"\n${paramsToJSON({numerator, denominator, maxValue,   ascending})}`);
   return ((maxValue - minValue) * Math.max(0, Math.min(1, Math.abs(Number(!ascending) - (numerator / denominator))))) + minValue;
 };
 
@@ -1235,6 +1296,7 @@ dlib.percentf = function (numerator, denominator, maxValue = 1, minValue = 0, as
  * @returns {string}
  */
 dlib.toHex = function (value) {
+  if(this.debug) console.log(`dlib - "toHex"\n${paramsToJSON({value})}`);
   let hex = value.toString(16);
   return hex.length === 1 ? "0" + hex : hex;
 };
@@ -1246,6 +1308,7 @@ dlib.toHex = function (value) {
  * @returns {number}
  */
 dlib.random = function (min, max) {
+  if(this.debug) console.log(`dlib - "random"\n${paramsToJSON({min, max})}`);
   return Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
@@ -1255,6 +1318,7 @@ dlib.random = function (min, max) {
  * @returns {number}
  */
 dlib.toDegrees = function (rads) {
+  if(this.debug) console.log(`dlib - "toDegrees"\n${paramsToJSON({rads})}`);
   return rads * (180 / Math.PI);
 };
 
@@ -1264,6 +1328,7 @@ dlib.toDegrees = function (rads) {
  * @returns {number}
  */
 dlib.toRadians = function (degs) {
+  if(this.debug) console.log(`dlib - "toRadians"\n${paramsToJSON({degs})}`);
   return degs * (Math.PI / 180);
 };
 
@@ -1276,6 +1341,7 @@ dlib.toRadians = function (degs) {
  * @returns {number}
  */
 dlib.getDistanceBetweenCoords = function (x1, y1, x2, y2) {
+  if(this.debug) console.log(`dlib - "getDistanceBetweenCoords"\n${paramsToJSON({x1, y1, x2, y2})}`);
   let dx = x2 - x1;
   let dy = y2 - y1;
   return Math.sqrt((dx * dx) + (dy * dy));
@@ -1288,6 +1354,7 @@ dlib.getDistanceBetweenCoords = function (x1, y1, x2, y2) {
  * @returns {number}
  */
 dlib.getDistanceDelta = function (dx, dy) {
+  if(this.debug) console.log(`dlib - "getDistanceDelta"\n${paramsToJSON({dx, dy})}`);
   return Math.sqrt((dx * dx) + (dy * dy));
 };
 
@@ -1301,6 +1368,7 @@ dlib.getDistanceDelta = function (dx, dy) {
  * @returns {number}
  */
 dlib.getPointOnLine = function (x1, y1, x2, y2, distanceFromX1Y1) {
+  if(this.debug) console.log(`dlib - "getPointOnLine"\n${paramsToJSON({x1, y1, x2, y2, distanceFromX1Y1})}`);
   let d = this.getDistanceBetweenCoords(x1, y1, x2, y2);
   if (d === 0) return [x1, y1];
 
@@ -1318,6 +1386,7 @@ dlib.getPointOnLine = function (x1, y1, x2, y2, distanceFromX1Y1) {
  * @returns {number}
  */
 dlib.getPointOnLinePercentage = function (x1, y1, x2, y2, percentageBetweenFromX1Y1) {
+  if(this.debug) console.log(`dlib - "getPointOnLinePercentage"\n${paramsToJSON({x1, y1, x2, y2, percentageBetweenFromX1Y1})}`);
   let deltaX = (x2 - x1);
   let deltaY = (y2 - y1);
   let x      = x1 + (deltaX * percentageBetweenFromX1Y1);
@@ -1333,6 +1402,7 @@ dlib.getPointOnLinePercentage = function (x1, y1, x2, y2, percentageBetweenFromX
  * @returns {number}
  */
 dlib.getPointOnLine2D = function (a, b, distanceFromPointA) {
+  if(this.debug) console.log(`dlib - "getPointOnLine2D"\n${paramsToJSON({a, b, distanceFromPointA})}`);
   let d   = b - a;
   let per = distanceFromPointA / d;
   return a + (d * per);
@@ -1346,6 +1416,7 @@ dlib.getPointOnLine2D = function (a, b, distanceFromPointA) {
  * @returns {number}
  */
 dlib.getPointOnLine2DPercentage = function (a, b, percentageFromPointA) {
+  if(this.debug) console.log(`dlib - "getPointOnLine2DPercentage"\n${paramsToJSON({a, b, percentageFromPointA})}`);
   let d = (b - a);
   return a + (d * percentageFromPointA);
 };
@@ -1365,6 +1436,7 @@ dlib.getPointOnLine2DPercentage = function (a, b, percentageFromPointA) {
  * @returns {number}
  */
 dlib.getBezierPoint = function (x1, y1, x2, y2, cx1, cy1, cx2, cy2, step, steps) {
+  if(this.debug) console.log(`dlib - "getBezierPoint"\n${paramsToJSON({x1, y1, x2, y2, cx1, cy1, cx2, cy2, step, steps})}`);
   return this.getBezierPointPercentage(x1, y1, x2, y2, cx1, cy1, cx2, cy2, step / steps);
 };
 
@@ -1382,6 +1454,7 @@ dlib.getBezierPoint = function (x1, y1, x2, y2, cx1, cy1, cx2, cy2, step, steps)
  * @returns {number}
  */
 dlib.getBezierPointPercentage = function (x1, y1, x2, y2, cx1, cy1, cx2, cy2, percentage) {
+  if(this.debug) console.log(`dlib - "getBezierPointPercentage"\n${paramsToJSON({x1, y1, x2, y2, cx1, cy1, cx2, cy2, percentage})}`);
   let x = this.getBezier2DPercentage(x1, x2, cx1, cx2, percentage);
   let y = this.getBezier2DPercentage(y1, y2, cy1, cy2, percentage);
   return {x, y};
@@ -1398,6 +1471,7 @@ dlib.getBezierPointPercentage = function (x1, y1, x2, y2, cx1, cy1, cx2, cy2, pe
  * @returns {number}
  */
 dlib.getBezier2D = function (p1, p2, cp1, cp2, step, steps) {
+  if(this.debug) console.log(`dlib - "getBezier2D"\n${paramsToJSON({p1, p2, cp1, cp2, step, steps})}`);
   return this.getBezier2DPercentage(p1, p2, cp1, cp2, step / steps);
 };
 
@@ -1411,6 +1485,7 @@ dlib.getBezier2D = function (p1, p2, cp1, cp2, step, steps) {
  * @returns {number}
  */
 dlib.getBezier2DPercentage = function (p1, p2, cp1, cp2, percentage) {
+  if(this.debug) console.log(`dlib - "getBezier2DPercentage"\n${paramsToJSON({p1, p2, cp1, cp2, percentage})}`);
   let C = 3 * (cp1 - p1);
   let B = 3 * (cp2 - cp1) - C;
   let A = p2 - p1 - C - B;
@@ -1430,6 +1505,7 @@ dlib.getBezier2DPercentage = function (p1, p2, cp1, cp2, percentage) {
  * @returns {object}
  */
 dlib.colorToRGBA = function (color) {
+  if(this.debug || this.debugColorMethods) console.log(`dlib - "colorToRGBA"\n${paramsToJSON({color})}`);
   let newColor = {r: 0, g: 0, b: 0, a: 1};
 
   try {
@@ -1484,6 +1560,7 @@ dlib.colorToRGBA = function (color) {
  * @returns {string}
  */
 dlib.rgbaToHex = function (red, green, blue, alpha) {
+  if(this.debug || this.debugColorMethods) console.log(`dlib - "rgbaToHex"\n${paramsToJSON({red, green, blue, alpha})}`);
   let {r, g, b, a} = _.isObjectLike(red) && _.has(red, ["r"]) && _.has(red, ["g"]) && _.has(red, ["b"]) ? red : _.isString(red) ? this.colorToRGBA(red) : {r: red, g: green, b: blue, a: alpha};
   if (_.isNil(r) || _.isNil(g) || _.isNil(b)) return undefined;
 
@@ -1502,6 +1579,7 @@ dlib.rgbaToHex = function (red, green, blue, alpha) {
  * @returns {string}
  */
 dlib.rgbaToString = function (color) {
+  if(this.debug || this.debugColorMethods) console.log(`dlib - "rgbaToString"\n${paramsToJSON({color})}`);
   if (!color) color = {};
   if (!color.r) color.r = 0;
   if (!color.g) color.g = 0;
@@ -1515,6 +1593,7 @@ dlib.rgbaToString = function (color) {
  * @param a - optional alpha channel, if omitted, an RGB string will be returned instead of RGBA
  */
 dlib.hexToRGBA = function (hexColor, a) {
+  if(this.debug || this.debugColorMethods) console.log(`dlib - "hexToRGBA"\n${paramsToJSON({hexColor, a})}`);
   if (!hexColor) return undefined;
   if (hexColor === "transparent") return 0;
   let color = this.colorToRGBA(hexColor);
@@ -1533,6 +1612,7 @@ dlib.hexToRGBA = function (hexColor, a) {
  * @returns {string}
  */
 dlib.colorBlend = function (percentage, from, to) {
+  if(this.debug || this.debugColorMethods) console.log(`dlib - "colorBlend"\n${paramsToJSON({percentage, from, to})}`);
   if (_.isNil(percentage) || _.isNil(from) || _.isNil(to)) return undefined;
   if (typeof (percentage) !== "number") return undefined;
   if (percentage === 0) return from;
@@ -1564,6 +1644,7 @@ dlib.colorBlend = function (percentage, from, to) {
  * @returns {number|undefined}
  */
 dlib.getBrightness = function (color) {
+  if(this.debug || this.debugColorMethods) console.log(`dlib - "getBrightness"\n${paramsToJSON({color})}`);
   if (_.isNil(color)) return undefined;
   try {
     let {r, g, b} = _.isObjectLike(color) && _.has(color, ["r"]) && _.has(color, ["g"]) && _.has(color, ["b"]) ? color : this.colorToRGBA(color);
@@ -1582,6 +1663,7 @@ dlib.getBrightness = function (color) {
  * @returns {boolean|undefined}
  */
 dlib.isDark = function (color, brightnessOffset = 0) {
+  if(this.debug || this.debugColorMethods) console.log(`dlib - "isDark"\n${paramsToJSON({color, brightnessOffset})}`);
   return this.getBrightness(color) < 123 + brightnessOffset;
 };
 
@@ -1597,6 +1679,7 @@ dlib.isDark = function (color, brightnessOffset = 0) {
  * @returns {string}
  */
 dlib.resizeImage = function (imgSource, targetWidth, targetHeight, keepAspectRatio = true) {
+  if(this.debug) console.log(`dlib - "resizeImage"\n${paramsToJSON({imgSource, targetWidth, targetHeight, keepAspectRatio})}`);
   return new Promise((resolve, reject, onCancel) => {
     let cancelled = false;
     onCancel && onCancel(() => cancelled = true);
@@ -1798,6 +1881,7 @@ dlib.rect = class rect {
  * @returns {object}
  */
 dlib.getViewport = function () {
+  if(this.debug) console.log(`dlib - "getViewport"\n${paramsToJSON({})}`);
   if (!this.getWindow || !this.getWindow()) throw new Error("dlib error: No window defined");
   if (!this.getDocument || !this.getDocument()) throw new Error("dlib error: No document defined");
   let w = Math.max(this.getDocument().documentElement.clientWidth, this.getWindow().innerWidth || 0);
@@ -1811,6 +1895,7 @@ dlib.getViewport = function () {
  * This function requires the initializer be called to set the document object.
  */
 dlib.focusNextElement = function () {
+  if(this.debug) console.log(`dlib - "focusNextElement"\n${paramsToJSON({})}`);
   if (!this.getDocument || !this.getDocument()) throw new Error("dlib error: No document defined");
   let currentFocus = this.getDocument().activeElement;
   let elements     = [...this.getDocument().querySelectorAll("a[href]:not([tabindex='-1']), area[href]:not([tabindex='-1']), input:not([disabled]):not([tabindex='-1']), select:not([disabled]):not([tabindex='-1']), textarea:not([disabled]):not([tabindex='-1']), button:not([disabled]):not([tabindex='-1']), iframe:not([tabindex='-1']), [tabindex]:not([tabindex='-1']), [contentEditable=true]:not([tabindex='-1'])")];
@@ -1828,6 +1913,7 @@ dlib.focusNextElement = function () {
  * @returns {string}
  */
 dlib.getFileSizeBaseUnit = function (size) {
+  if(this.debug) console.log(`dlib - "getFileSizeBaseUnit"\n${paramsToJSON({size})}`);
   if (size < 1000) return "b";
   if (size < 1000000) return "kb";
   if (size < 1000000000) return "mb";
@@ -1844,6 +1930,7 @@ dlib.getFileSizeBaseUnit = function (size) {
  * @returns {string}
  */
 dlib.getFileSizeString = function (size, unit = "b", decimals = 0, addUnit = true) {
+  if(this.debug) console.log(`dlib - "getFileSizeString"\n${paramsToJSON({size, unit,   addUnit})}`);
   unit = _.toUpper(unit);
   if (unit !== "B" && unit !== "KB" && unit !== "MB" && unit !== "GB" && unit !== "TB") unit = "KB";
   if (_.isNil(size)) size = 0;
@@ -1872,6 +1959,7 @@ dlib.getFileSizeString = function (size, unit = "b", decimals = 0, addUnit = tru
  * @returns {array}
  */
 dlib.getAllDirectories = function (dir) {
+  if(this.debug) console.log(`dlib - "getAllDirectories"\n${paramsToJSON({dir})}`);
   let returnDirs = [dir];
   if (fs.existsSync(dir)) {
     let files       = fs.readdirSync(dir);
@@ -1891,6 +1979,7 @@ dlib.getAllDirectories = function (dir) {
  * @returns {array}
  */
 dlib.pathSorter = function (sep = "/") {
+  if(this.debug) console.log(`dlib - "pathSorter"\n${paramsToJSON({sep})}`);
   return function (aValue, bValue) {
     let a = aValue.split(sep);
     let b = bValue.split(sep);
@@ -1908,6 +1997,7 @@ dlib.pathSorter = function (sep = "/") {
 };
 
 dlib.sort = function (arr, locale, path = undefined, caseInsensitive = false, trim = false) {
+  if(this.debug) console.log(`dlib - "sort"\n${paramsToJSON({arr, locale, path,   trim})}`);
   let collator = new Intl.Collator(locale || "en-CA", {sensitivity: 'base'});
   arr.sort((valA, valB) => {
     if (path) valA = _.get(valA, [path]);
@@ -1937,6 +2027,7 @@ dlib.sort = function (arr, locale, path = undefined, caseInsensitive = false, tr
  * @returns {string}
  */
 dlib.loadFileAsync = function (path) {
+  if(this.debug) console.log(`dlib - "loadFileAsync"\n${paramsToJSON({path})}`);
   return new Promise((resolve, reject) => {
     let xhr                = new XMLHttpRequest();
     xhr.onreadystatechange = function () {
@@ -1968,6 +2059,7 @@ dlib.loadFileAsync = function (path) {
  * @param trimExtension
  */
 dlib.importFiles = function (cache, files, trimTopLevelFolder = true, trimExtension = true) {
+  if(this.debug) console.log(`dlib - "importFiles"\n${paramsToJSON({cache, files, trimTopLevelFolder,  trimExtension})}`);
   return new Promise((resolve, reject) => {
     files.keys().forEach(key => {
       let cacheKey = key;
@@ -1989,6 +2081,7 @@ dlib.importFiles = function (cache, files, trimTopLevelFolder = true, trimExtens
  * @returns {(number|string|object|boolean)}
  */
 dlib.getReqProp = function (req, prop = undefined, defaultValue = undefined) {
+  if(this.debug) console.log(`dlib - "getReqProp"\n${paramsToJSON({req, prop,  defaultValue})}`);
   if (!req) return undefined;
 
   let values = undefined;
@@ -2010,6 +2103,7 @@ dlib.getReqProp = function (req, prop = undefined, defaultValue = undefined) {
  * @param parentElement - depending on the dom layout, putting the element in the root body may not always work so you can specify where you want the element to appear.
  */
 dlib.copyToClipboard = function (str, parentElement = undefined) {
+  if(this.debug) console.log(`dlib - "copyToClipboard"\n${paramsToJSON({str, parentElement})}`);
   if (!this.getDocument || !this.getDocument()) throw new Error("dlib error: No document defined.");
   if (!parentElement) parentElement = this.getDocument().body;
   const el = this.getDocument().createElement('textarea');
@@ -2046,6 +2140,7 @@ dlib.openURLOptions = {
  * Open a url either using the history object or the window object. Both need to be set by the initializer for this to work.
  */
 dlib.openURL = function (pathname, options = {}) {
+  if(this.debug) console.log(`dlib - "openURL"\n${paramsToJSON({pathname, options})}`);
   if (!this.getHistory()) throw new Error("dlib error: No history defined");
   if (!this.getWindow()) throw new Error("dlib error: No window defined");
   if (!this.getHistory()) throw new Error("dlib error: No history defined");
@@ -2080,6 +2175,7 @@ dlib.openURL = function (pathname, options = {}) {
  * @returns {string}
  */
 dlib.numberToIPv4 = function (ipNum) {
+  if(this.debug) console.log(`dlib - "numberToIPv4"\n${paramsToJSON({ipNum})}`);
   if (!ipNum) return "0.0.0.0";
   return `${Math.floor((ipNum / 16777216)) % 256}.${Math.floor((ipNum / 65536)) % 256}.${Math.floor((ipNum / 256)) % 256}.${ipNum % 256}`;
 };
@@ -2092,6 +2188,7 @@ dlib.getLocationProviders = {
 };
 
 dlib.getLocationFromIp = function (ip, provider = "freegeoip", extra = false, raw = false) {
+  if(this.debug) console.log(`dlib - "getLocationFromIp"\n${paramsToJSON({ip, provider,   raw})}`);
   return new Promise((resolve, reject) => {
 
     let url = "";
@@ -2198,6 +2295,7 @@ dlib.iso_3166_2 = iso_3166_2;
  * @param subdivisionShort
  */
 dlib.checkLocation = function (countryShort, subdivisionShort) {
+  if(this.debug) console.log(`dlib - "checkLocation"\n${paramsToJSON({countryShort, subdivisionShort})}`);
   if (!_.has(iso_3166_2, countryShort)) return false;
   if (!_.has(iso_3166_2[countryShort].divisions, subdivisionShort)) return false;
 };
@@ -2208,6 +2306,7 @@ dlib.checkLocation = function (countryShort, subdivisionShort) {
  * @param countryShort
  */
 dlib.checkCountry = function (countryShort) {
+  if(this.debug) console.log(`dlib - "checkCountry"\n${paramsToJSON({countryShort})}`);
   return _.has(iso_3166_2, countryShort);
 };
 
@@ -2217,6 +2316,7 @@ dlib.checkCountry = function (countryShort) {
  * @param subdivisionShort
  */
 dlib.checkSubdivision = function (subdivisionShort) {
+  if(this.debug) console.log(`dlib - "checkSubdivision"\n${paramsToJSON({subdivisionShort})}`);
   return _.has(iso_3166_2, [_.nth(_.split(subdivisionShort, "-"), 0), "divisions", subdivisionShort]);
 };
 
@@ -2227,6 +2327,7 @@ dlib.checkSubdivision = function (subdivisionShort) {
  * @param subdivisionShort
  */
 dlib.getLongLocation = function (countryShort, subdivisionShort) {
+  if(this.debug) console.log(`dlib - "getLongLocation"\n${paramsToJSON({countryShort, subdivisionShort})}`);
   let countryLong     = _.get(iso_3166_2, [countryShort, "name"]);
   let subdivisionLong = _.get(iso_3166_2, [countryShort, "divisions", subdivisionShort]);
   return {countryLong, subdivisionLong};
@@ -2238,6 +2339,7 @@ dlib.getLongLocation = function (countryShort, subdivisionShort) {
  * @param countryShort
  */
 dlib.getCountryLong = function (countryShort) {
+  if(this.debug) console.log(`dlib - "getCountryLong"\n${paramsToJSON({countryShort})}`);
   return _.get(iso_3166_2, [countryShort, "name"]);
 };
 
@@ -2247,6 +2349,7 @@ dlib.getCountryLong = function (countryShort) {
  * @param subdivisionShort
  */
 dlib.getSubdivisionLong = function (subdivisionShort) {
+  if(this.debug) console.log(`dlib - "getSubdivisionLong"\n${paramsToJSON({subdivisionShort})}`);
   return _.get(iso_3166_2, [_.nth(_.split(subdivisionShort, "-"), 0), "divisions", subdivisionShort]);
 };
 
@@ -2256,6 +2359,7 @@ dlib.getSubdivisionLong = function (subdivisionShort) {
  * @param subdivisionShort
  */
 dlib.getSubdivisionCompact = function (subdivisionShort) {
+  if(this.debug) console.log(`dlib - "getSubdivisionCompact"\n${paramsToJSON({subdivisionShort})}`);
   return _.trim(_.replace(_.get(iso_3166_2, [_.nth(_.split(subdivisionShort, "-"), 0), "divisions", subdivisionShort]), /(,.*)|(\(.*\))|(\[.*])/, ""));
 };
 
@@ -2264,6 +2368,7 @@ dlib.getSubdivisionCompact = function (subdivisionShort) {
  * @returns {[]}
  */
 dlib.getCountries = function () {
+  if(this.debug) console.log(`dlib - "getCountries"\n${paramsToJSON({})}`);
   let countries = [];
   _.map(iso_3166_2, (value, key) => countries.push({code: key, name: value.name}));
   return countries;
@@ -2275,6 +2380,7 @@ dlib.getCountries = function () {
  * @returns {[]}
  */
 dlib.getSubdivisions = function (country) {
+  if(this.debug) console.log(`dlib - "getSubdivisions"\n${paramsToJSON({country})}`);
   let subdivisions = [];
   _.map(_.get(iso_3166_2, [country, "divisions"], {}), (value, key) => subdivisions.push({code: key, name: value}));
   return subdivisions;
@@ -2286,6 +2392,7 @@ dlib.getSubdivisions = function (country) {
  * @returns {[]}
  */
 dlib.getSubdivisionsCompact = function (country) {
+  if(this.debug) console.log(`dlib - "getSubdivisionsCompact"\n${paramsToJSON({country})}`);
   let subdivisions = [];
   _.map(_.get(iso_3166_2, [country, "divisions"], {}), (value, key) => subdivisions.push({code: key, name: _.trim(_.replace(value, /(,.*)|(\(.*\))|(\[.*])/, ""))}));
   return subdivisions;
@@ -2297,6 +2404,7 @@ dlib.getSubdivisionsCompact = function (country) {
  * @param subdivision
  */
 dlib.compactSubdivisionName = function (subdivision) {
+  if(this.debug) console.log(`dlib - "compactSubdivisionName"\n${paramsToJSON({subdivision})}`);
   return _.trim(_.replace(subdivision, /(,.*)|(\(.*\))|(\[.*])/, ""))
 };
 
