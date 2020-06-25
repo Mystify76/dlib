@@ -1,6 +1,6 @@
 {
   "name": "@mystify/dlib",
-  "version": "1.0.50",
+  "version": "1.0.51",
   "description": "A collection of simple shortcut functions I use across various projects. Mainly for ES6, React, and NodeJS",
   "main": "index.js",
   "author": "David Gallant",
@@ -25,14 +25,14 @@
   "build": {
     "major": "1",
     "minor": "0",
-    "revision": "50",
-    "build": "0003",
+    "revision": "51",
+    "build": "0004",
     "year": "2020",
     "month": "06",
-    "day": "21",
-    "hour": "13",
-    "minute": "08",
-    "second": "03",
-    "date": "1592755683012"
+    "day": "25",
+    "hour": "08",
+    "minute": "37",
+    "second": "19",
+    "date": "1593085039140"
   }
 }
