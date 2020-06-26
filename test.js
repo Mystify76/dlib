@@ -1,4 +1,4 @@
-const dlib = require("./index");
+const dlib = require("./index").default;
 
 console.log("UUID:", dlib.UUID());
 
