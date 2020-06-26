@@ -2408,4 +2408,4 @@ dlib.compactSubdivisionName = function (subdivision) {
   return _.trim(_.replace(subdivision, /(,.*)|(\(.*\))|(\[.*])/, ""))
 };
 
-module.exports = {default: dlib};
+exports.dlib = dlib;
