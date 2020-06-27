@@ -18,13 +18,11 @@ const dlib = {
   debugColorMethods: false
 };
 
-function paramsToJSON(...args) {
-  let obj = {};
-  args.forEach(arg => {
-    arg = arg.indexOf(" = ") < 0 ? arg : arg.substr(0, arg.indexOf(" = "));
-    obj[arg] = eval(arg);
+function paramsToJSON(paramsObj) {
+  _.keys(paramsObj).forEach(arg => {
+    paramsObj[arg] = _.isFunction(paramsObj[arg]) ? "function": paramsObj[arg];
   });
-  return JSON.stringify(args, null, 2);
+  return JSON.stringify(paramsObj, null, 2);
 }
 
 /**
