@@ -1,6 +1,6 @@
 {
   "name": "@mystify/dlib",
-  "version": "1.0.56",
+  "version": "1.0.58",
   "description": "A collection of simple shortcut functions I use across various projects. Mainly for ES6, React, and NodeJS",
   "main": "index.js",
   "author": "David Gallant",
@@ -9,30 +9,30 @@
     "deploy": "node deploy.js"
   },
   "devDependencies": {
-    "@mystify/buildmanagement": "^1.0.9",
+    "@mystify/buildmanagement": "^1.0.10",
     "prompt-promise": "^1.0.3",
-    "simple-git": "^2.6.0"
+    "simple-git": "^2.31.0"
   },
   "dependencies": {
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "bluebird": "^3.7.2",
-    "fs-extra": "^8.1.0",
-    "lodash": "^4.17.15",
-    "moment": "^2.24.0",
-    "query-string": "^6.10.1"
+    "fs-extra": "^9.0.1",
+    "lodash": "^4.17.20",
+    "moment": "^2.29.1",
+    "query-string": "^6.13.8"
   },
   "homepage": "https://github.com/Mystify76/dlib",
   "build": {
     "major": "1",
     "minor": "0",
-    "revision": "56",
-    "build": "0009",
-    "year": "2020",
-    "month": "06",
-    "day": "26",
-    "hour": "21",
-    "minute": "26",
-    "second": "44",
-    "date": "1593217604547"
+    "revision": "58",
+    "build": "0010",
+    "year": "2021",
+    "month": "01",
+    "day": "19",
+    "hour": "13",
+    "minute": "23",
+    "second": "31",
+    "date": "1611077011805"
   }
 }
